@@ -17,6 +17,10 @@ automatically at DSH startup — no manual activation needed.
 - ⚡ Fast: batched session-title reads with an in-memory cache (TTL 5 min), single-pass summaries, memoized pricing
 - 📤 CSV / JSON export, filterable by model and session
 
+## Screenshot
+
+![Token Stats dashboard](docs/demo.png)
+
 ## Installation
 
 The plugin is installed as an external DSH profile dependency.
