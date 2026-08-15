@@ -1,0 +1,5 @@
+# dsh bundle layer: mount the token-stats plugin (server half: index.js;
+# client half: client.js served by dsh-client-modules under /plugins).
+- insert:
+    - id: token-stats
+      name: dsh-token-stats

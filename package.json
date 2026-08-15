@@ -1,0 +1,33 @@
+{
+  "name": "dsh-token-stats",
+  "version": "1.0.0",
+  "description": "DSH plugin: token usage & cost statistics per model / date / session with history backfill and CSV/JSON export",
+  "type": "module",
+  "main": "index.js",
+  "license": "MIT",
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "plugin",
+    "token",
+    "usage",
+    "statistics",
+    "cost"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "inject": [
+        "slots"
+      ],
+      "platform": "web"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}
