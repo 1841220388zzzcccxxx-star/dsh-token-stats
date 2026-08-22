@@ -122,6 +122,9 @@ console.log('== correctness (small corpus: 5 sessions × 1 msg) ==')
   check('summary.total.total === input+output+cacheRead+cacheWrite+reasoning',
     sum.total.total === sum.total.input + sum.total.output + sum.total.cacheRead + sum.total.cacheWrite + sum.total.reasoning)
   check('summary.today.calls === 0 (events are 1..5 days old)', sum.today.calls === 0, 'got ' + sum.today.calls)
+  check('summary.prev has yesterday/lastWeek/lastMonth',
+    !!sum.prev && 'yesterday' in sum.prev && 'lastWeek' in sum.prev && 'lastMonth' in sum.prev)
+  check('summary.prev.yesterday is a shape', sum.prev.yesterday && typeof sum.prev.yesterday.total === 'number')
 
   // query (day granularity, no filter)
   res = await callHandler(handler, '/token-stats/api?op=query&granularity=day')
@@ -131,6 +134,7 @@ console.log('== correctness (small corpus: 5 sessions × 1 msg) ==')
   check('query.models.length === 3', q.models.length === 3, 'got ' + q.models.length)
   check('query.sessions.length === 5', q.sessions.length === 5, 'got ' + q.sessions.length)
   check('query cost: deepseek-v4-flash usd > 0', q.models.some((m) => m.model.includes('deepseek-v4-flash') && m.usd > 0))
+  check('query.models have prevTotal field', q.models.every((m) => typeof m.prevTotal === 'number'))
 
   // query with model filter
   res = await callHandler(handler, '/token-stats/api?op=query&model=deepseek-chat')

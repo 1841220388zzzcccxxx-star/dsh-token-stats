@@ -12,24 +12,38 @@ window.__ModuleLoader__.load({
 			".tkst-card{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px 12px}",
 			".tkst-card .k{font-size:11px;color:var(--dsw-alias-label-secondary)}",
 			".tkst-card .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-primary);margin-top:2px}",
-			".tkst-card .s{font-size:11px;color:var(--dsw-alias-label-secondary);margin-top:2px}",
+			".tkst-card .s{font-size:11px;color:var(--dsw-alias-label-secondary);margin-top:2px;display:flex;gap:6px;align-items:center}",
 			".tkst-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}",
 			".tkst-filters select{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 10px;font-size:12px}",
 			".tkst-filters button{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}",
 			".tkst-filters button:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}",
+			".tkst-filters input[type=text]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 10px;font-size:12px;min-width:160px}",
+			".tkst-filters input[type=text]:focus{border-color:var(--dsw-alias-brand-primary);outline:none}",
+			".tkst-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}",
+			".tkst-grid .tkst-full{grid-column:1 / -1}",
 			".tkst-sec{margin-bottom:16px}",
 			".tkst-sec h4{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}",
 			".tkst-chart{width:100%;height:170px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
 			".tkst-bars{display:flex;flex-direction:column;gap:6px}",
-			".tkst-bar{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:12px}",
+			".tkst-bar{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:12px;cursor:pointer;padding:2px 4px;border-radius:6px}",
+			".tkst-bar:hover{background:var(--dsw-alias-bg-layer-2)}",
 			".tkst-bar .n{color:var(--dsw-alias-label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
 			".tkst-bar .track{background:var(--dsw-alias-bg-layer-2);border-radius:5px;height:14px;overflow:hidden}",
 			".tkst-bar .fill{height:100%;background:var(--dsw-alias-brand-primary);border-radius:5px;min-width:2px}",
 			".tkst-bar .v2{color:var(--dsw-alias-label-secondary);text-align:right;font-variant-numeric:tabular-nums}",
 			".tkst-table{width:100%;border-collapse:collapse;font-size:12px}",
-			".tkst-table th{text-align:left;color:var(--dsw-alias-label-secondary);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--dsw-alias-border-l1);white-space:nowrap}",
+			".tkst-table th{text-align:left;color:var(--dsw-alias-label-secondary);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--dsw-alias-border-l1);white-space:nowrap;cursor:pointer;user-select:none}",
+			".tkst-table th:hover{color:var(--dsw-alias-label-primary)}",
+			".tkst-table th.tkst-sort-asc::after{content:' ▲';font-size:9px}",
+			".tkst-table th.tkst-sort-desc::after{content:' ▼';font-size:9px}",
 			".tkst-table td{padding:6px 8px;color:var(--dsw-alias-label-primary);border-bottom:1px solid var(--dsw-alias-border-l1);font-variant-numeric:tabular-nums;white-space:nowrap}",
 			".tkst-table tr:hover td{background:var(--dsw-alias-bg-layer-1)}",
+			".tkst-table tr.tkst-row-click{cursor:pointer}",
+			".tkst-table tr.tkst-sub td{background:var(--dsw-alias-bg-layer-2);padding-left:24px;border-bottom:1px solid var(--dsw-alias-border-l1)}",
+			".tkst-delta{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}",
+			".tkst-delta.up{color:var(--dsw-alias-state-error-primary)}",
+			".tkst-delta.down{color:var(--dsw-alias-state-success-primary)}",
+			".tkst-delta.flat{color:var(--dsw-alias-label-secondary)}",
 			".tkst-empty{color:var(--dsw-alias-label-secondary);font-size:12px;padding:18px;text-align:center}",
 			".tkst-rate{font-size:11px;color:var(--dsw-alias-label-secondary);margin-left:auto;padding-right:4px}",
 			".tkst-exportbox{margin-top:10px;padding:10px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:8px}",
@@ -40,7 +54,12 @@ window.__ModuleLoader__.load({
 			"@keyframes tkst-rot{to{transform:rotate(360deg)}}",
 			".tkst-meta{font-size:11px;color:var(--dsw-alias-label-secondary);margin-left:auto;padding-right:4px;white-space:nowrap}",
 			".tkst-btn-refresh{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}",
-			".tkst-btn-refresh:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}"
+			".tkst-btn-refresh:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}",
+			".tkst-sess-input{position:relative}",
+			".tkst-sess-list{position:absolute;top:calc(100% + 2px);left:0;z-index:50;min-width:220px;max-height:220px;overflow:auto;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.2)}",
+			".tkst-sess-list div{padding:6px 10px;font-size:12px;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+			".tkst-sess-list div:hover,.tkst-sess-list div.tkst-sess-sel{background:var(--dsw-alias-bg-layer-2)}",
+			".tkst-sess-empty{padding:8px 10px;font-size:12px;color:var(--dsw-alias-label-secondary)}"
 		].join("");
 		const tagId = "dsh-token-stats/style";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
@@ -68,7 +87,9 @@ window.__ModuleLoader__.load({
 				allSessions: "全部会话", trend: "用量趋势", byModel: "按模型统计", bySession: "按会话统计",
 				exportCsv: "导出 CSV", exportJson: "导出 JSON", empty: "暂无数据",
 				estimated: "含估算", usdRate: "汇率", copied: "导出内容已生成（浏览器限制，请手动复制下方内容）",
-				refresh: "刷新", loading: "加载中…", updating: "刷新中…", updatedAt: "最后更新"
+				refresh: "刷新", loading: "加载中…", updating: "刷新中…", updatedAt: "最后更新",
+				vsPrev: "较上期", expand: "展开", collapse: "收起", searchSess: "搜索会话…",
+				noMatch: "无匹配会话", allSess: "全部会话", delta: "环比"
 			},
 			en: {
 				title: "📊 Token Stats", today: "Today", week: "Week", month: "Month", total: "Total",
@@ -78,7 +99,9 @@ window.__ModuleLoader__.load({
 				allSessions: "All sessions", trend: "Usage Trend", byModel: "By Model", bySession: "By Session",
 				exportCsv: "Export CSV", exportJson: "Export JSON", empty: "No data",
 				estimated: "incl. estimated", usdRate: "Rate", copied: "Export content generated (browser limits, copy manually below)",
-				refresh: "Refresh", loading: "Loading…", updating: "Refreshing…", updatedAt: "Updated"
+				refresh: "Refresh", loading: "Loading…", updating: "Refreshing…", updatedAt: "Updated",
+				vsPrev: "vs prev", expand: "Expand", collapse: "Collapse", searchSess: "Search sessions…",
+				noMatch: "No matching session", allSess: "All sessions", delta: "Change"
 			}
 		};
 		const T = () => (isZh() ? DICT.zh : DICT.en);
@@ -122,6 +145,25 @@ window.__ModuleLoader__.load({
 		const fmtTime = (d) => {
 			const p = (n) => String(n).padStart(2, "0");
 			return p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+		};
+
+		// period-over-period: percent change with up/down/flat class
+		const pctDelta = (cur, prev) => {
+			if (!prev) return { cls: "flat", txt: "—" };
+			const d = (cur - prev) / prev;
+			const sign = d > 0 ? "+" : d < 0 ? "-" : "";
+			const cls = d > 0.0001 ? "up" : d < -0.0001 ? "down" : "flat";
+			return { cls, txt: sign + (Math.abs(d) * 100).toFixed(1) + "%" };
+		};
+		// generic sorter for tables (key may be a string or getter)
+		const sortRows = (rows, key, dir) => {
+			if (!key) return rows;
+			const k = (r) => (typeof key === "function" ? key(r) : r[key]);
+			return [...rows].sort((a, b) => {
+				const va = k(a), vb = k(b);
+				if (typeof va === "string" && typeof vb === "string") return dir * (va < vb ? -1 : va > vb ? 1 : 0);
+				return dir * ((va || 0) - (vb || 0));
+			});
 		};
 
 		const download = (filename, content, onFallback) => {
@@ -176,6 +218,13 @@ window.__ModuleLoader__.load({
 			const [updating, setUpdating] = react.useState(false);   // background refresh in progress
 			const [updatedAt, setUpdatedAt] = react.useState(null);  // last successful refresh time
 			const [refreshTick, setRefreshTick] = react.useState(0); // manual refresh trigger
+			const [sessQuery, setSessQuery] = react.useState("");     // session search box text
+			const [sessOpen, setSessOpen] = react.useState(false);    // session dropdown open
+			const [sortModel, setSortModel] = react.useState({ key: "total", dir: -1 }); // model table sort
+			const [sortSess, setSortSess] = react.useState({ key: "total", dir: -1 });   // session table sort
+			// drill-down: expanded model -> its sessions; expanded session -> daily detail
+			const [drill, setDrill] = react.useState({ model: null, session: null });
+			const [drillData, setDrillData] = react.useState({ model: null, session: null }); // {model: {sessions:[...]}, session: {series:[...]}}
 
 			// mount + manual refresh: static data (sessions/models) + summary, cached
 			react.useEffect(() => {
@@ -249,6 +298,37 @@ window.__ModuleLoader__.load({
 				return () => { alive = false; };
 			}, [gran, model, session, refreshTick]);
 
+			// drill-down loader: expanded model -> sessions; expanded session -> daily series
+			react.useEffect(() => {
+				let alive = true;
+				const run = async () => {
+					try {
+						if (drill.model && !drillData.model) {
+							const res = await api("query", { granularity: "day", model: drill.model });
+							if (alive) setDrillData((d) => ({ ...d, model: res.sessions || [] }));
+						}
+						if (drill.session && !drillData.session) {
+							const res = await api("query", { granularity: "day", sessionId: drill.session });
+							if (alive) setDrillData((d) => ({ ...d, session: res.series || [] }));
+						}
+					} catch (e) {
+						if (alive) setErr("钻取加载失败: " + String(e && e.message ? e.message : e));
+					}
+				};
+				run();
+				return () => { alive = false; };
+			}, [drill, drillData.model, drillData.session]);
+
+			const toggleModelDrill = (m) => {
+				// always invalidate cached sub-rows so switching targets refetches
+				setDrillData((d) => ({ ...d, model: null }));
+				setDrill((d) => ({ ...d, model: d.model === m ? null : m }));
+			};
+			const toggleSessionDrill = (sid) => {
+				setDrillData((d) => ({ ...d, session: null }));
+				setDrill((d) => ({ ...d, session: d.session === sid ? null : sid }));
+			};
+
 			const t = T();
 			const doExport = async (format) => {
 				try {
@@ -267,18 +347,48 @@ window.__ModuleLoader__.load({
 			};
 
 			const cards = summary ? [
-				[t.today, fmt(summary.today.total), t.calls + " " + summary.today.calls],
-				[t.week, fmt(summary.week.total), t.calls + " " + summary.week.calls],
-				[t.month, fmt(summary.month.total), t.calls + " " + summary.month.calls],
-				[t.total, fmt(summary.total.total), t.calls + " " + summary.total.calls]
+				[t.today, fmt(summary.today.total), t.calls + " " + summary.today.calls, summary.prev ? pctDelta(summary.today.total, summary.prev.yesterday.total) : null],
+				[t.week, fmt(summary.week.total), t.calls + " " + summary.week.calls, summary.prev ? pctDelta(summary.week.total, summary.prev.lastWeek.total) : null],
+				[t.month, fmt(summary.month.total), t.calls + " " + summary.month.calls, summary.prev ? pctDelta(summary.month.total, summary.prev.lastMonth.total) : null],
+				[t.total, fmt(summary.total.total), t.calls + " " + summary.total.calls, null]
 			] : null;
 
 			const modelOptions = (q0 && q0.models ? q0.models : q && q.models ? q.models : []).map((m) => m.model);
 			const uniqueModels = modelOptions.filter((v, i, a) => a.indexOf(v) === i);
-			const modelRows = (q && q.models ? q.models : []).slice(0, 12);
-			const sessionRows = (q && q.sessions ? q.sessions : []).slice(0, 12);
+			const modelRowsAll = q && q.models ? q.models : [];
+			const sessionRowsAll = q && q.sessions ? q.sessions : [];
+			// precompute a sortable period-over-period ratio per model row
+			const modelRowsWithDelta = modelRowsAll.map((m) => ({
+				...m,
+				deltaRatio: m.prevTotal > 0 ? m.total / m.prevTotal : (m.prevTotal === 0 && m.total > 0 ? Infinity : 0),
+			}));
+			const modelRows = sortRows(modelRowsWithDelta, sortModel.key, sortModel.dir).slice(0, 12);
+			const sessionRows = sortRows(sessionRowsAll, sortSess.key, sortSess.dir).slice(0, 12);
 			const series = q && q.series ? q.series : [];
 			const isLoading = loading && !summary && !q;
+
+			// session search: fuzzy match on id/title
+			const sessFiltered = sessQuery
+				? sessions.filter((s) => (s.title || s.id).toLowerCase().indexOf(sessQuery.toLowerCase()) !== -1)
+				: sessions;
+			const sessSelTitle = session
+				? (sessions.find((s) => s.id === session) || { title: session }).title
+				: "";
+			// drill-down rows for the expanded model / session
+			const drillModelSessions = drill.model && drillData.model ? drillData.model : null;
+			const drillSessionSeries = drill.session && drillData.session ? drillData.session : null;
+
+			const th = (label, sort, state, setState) => {
+				const cls = state.key === sort ? (state.dir === 1 ? "tkst-sort-asc" : "tkst-sort-desc") : "";
+				return react.createElement("th", {
+					key: sort,
+					className: cls,
+					onClick: () => setState((s) => s.key === sort ? { key: sort, dir: -s.dir } : { key: sort, dir: -1 })
+				}, label);
+			};
+			const deltaSpan = (d) => d
+				? react.createElement("span", { className: "tkst-delta " + d.cls }, d.txt)
+				: null;
 
 			return react.createElement("div", null,
 				err ? react.createElement("div", { className: "tkst-err" }, err) : null,
@@ -292,7 +402,10 @@ window.__ModuleLoader__.load({
 						react.createElement("div", { className: "tkst-card", key: i },
 							react.createElement("div", { className: "k" }, c[0]),
 							react.createElement("div", { className: "v" }, c[1]),
-							react.createElement("div", { className: "s" }, c[2])
+							react.createElement("div", { className: "s" },
+								react.createElement("span", null, c[2]),
+								deltaSpan(c[3])
+							)
 						))
 					: [0, 1, 2, 3].map((i) =>
 						react.createElement("div", { className: "tkst-card", key: i },
@@ -310,10 +423,28 @@ window.__ModuleLoader__.load({
 						react.createElement("option", { value: "" }, t.allModels),
 						uniqueModels.map((m) => react.createElement("option", { key: m, value: m }, m))
 					),
-					react.createElement("select", { value: session, onChange: (e) => setSession(e.target.value) },
-						react.createElement("option", { value: "" }, t.allSessions),
-						sessions.map((s) => react.createElement("option", { key: s.id, value: s.id }, s.title))
+					react.createElement("div", { className: "tkst-sess-input" },
+						react.createElement("input", {
+							type: "text", placeholder: t.searchSess,
+							value: sessQuery,
+							onFocus: () => setSessOpen(true),
+							onBlur: () => setTimeout(() => setSessOpen(false), 150),
+							onChange: (e) => { setSessQuery(e.target.value); setSessOpen(true); }
+						}),
+						sessOpen ? react.createElement("div", { className: "tkst-sess-list" },
+							sessFiltered.length === 0
+								? react.createElement("div", { className: "tkst-sess-empty" }, t.noMatch)
+								: sessFiltered.map((s) => {
+									const sel = s.id === session;
+									return react.createElement("div", { key: s.id, className: sel ? "tkst-sess-sel" : "", onMouseDown: () => {
+										setSession(sel ? "" : s.id);
+										setSessQuery(sel ? "" : s.title || s.id);
+										setSessOpen(false);
+									}}, (s.title || s.id) + (sel ? " ✓" : ""));
+								})
+						) : null
 					),
+					session ? react.createElement("button", { onClick: () => { setSession(""); setSessQuery(""); } }, "✕ " + t.allSess) : null,
 					react.createElement("button", { onClick: () => setRefreshTick((x) => x + 1), title: t.refresh },
 						updating ? t.updating : "↻ " + t.refresh),
 					react.createElement("button", { onClick: () => doExport("csv") }, t.exportCsv),
@@ -323,20 +454,22 @@ window.__ModuleLoader__.load({
 					updatedAt ? react.createElement("span", { className: "tkst-meta" },
 						t.updatedAt + " " + fmtTime(updatedAt)) : null
 				),
-				react.createElement("div", { className: "tkst-sec" },
-					react.createElement("h4", null, t.trend),
-					series.length === 0 && !q
-						? react.createElement("div", { className: "tkst-empty" }, t.loading)
-						: react.createElement(LineChart, { series: series })
-				),
+				react.createElement("div", { className: "tkst-grid" },
+				react.createElement("div", { className: "tkst-full" },
+					react.createElement("div", { className: "tkst-sec" },
+						react.createElement("h4", null, t.trend),
+						series.length === 0 && !q
+							? react.createElement("div", { className: "tkst-empty" }, t.loading)
+							: react.createElement(LineChart, { series: series })
+					)),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.byModel),
 					modelRows.length === 0
 						? react.createElement("div", { className: "tkst-empty" }, t.empty)
 						: react.createElement("div", { className: "tkst-bars" }, modelRows.map((m) => {
 							const max = modelRows[0].total || 1;
-							return react.createElement("div", { className: "tkst-bar", key: m.model },
-								react.createElement("span", { className: "n", title: m.model }, m.model),
+							return react.createElement("div", { className: "tkst-bar", key: m.model, onClick: () => toggleModelDrill(m.model), title: t.expand + ": " + m.model },
+								react.createElement("span", { className: "n", title: m.model }, (drill.model === m.model ? "▾ " : "▸ ") + m.model),
 								react.createElement("div", { className: "track" },
 									react.createElement("div", { className: "fill", style: { width: Math.max(2, (m.total / max) * 100) + "%" } })),
 								react.createElement("span", { className: "v2" }, fmt(m.total))
@@ -347,40 +480,101 @@ window.__ModuleLoader__.load({
 					react.createElement("h4", null, t.byModel + " / " + t.bySession),
 					react.createElement("table", { className: "tkst-table" },
 						react.createElement("thead", null, react.createElement("tr", null,
-							react.createElement("th", null, t.model), react.createElement("th", null, t.calls),
-							react.createElement("th", null, t.input), react.createElement("th", null, t.output),
-							react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd),
-							react.createElement("th", null, t.costCny)
+							th(t.model, "model", sortModel, setSortModel),
+							th(t.delta, "deltaRatio", sortModel, setSortModel),
+							th(t.calls, "calls", sortModel, setSortModel),
+							th(t.tokens, "total", sortModel, setSortModel),
+							th(t.costUsd, "usd", sortModel, setSortModel),
+							th(t.costCny, "cny", sortModel, setSortModel)
 						)),
-						react.createElement("tbody", null, modelRows.map((m) =>
-							react.createElement("tr", { key: m.model },
-								react.createElement("td", null, m.model), react.createElement("td", null, m.calls),
-								react.createElement("td", null, fmt(m.input)), react.createElement("td", null, fmt(m.output)),
-								react.createElement("td", null, fmt(m.total)),
-								react.createElement("td", null, fmtMoney(m.usd)), react.createElement("td", null, fmtCny(m.cny))
-							)))
+						react.createElement("tbody", null,
+							modelRows.map((m) => {
+								const dd = m.prevTotal > 0 ? pctDelta(m.total, m.prevTotal) : null;
+								const isOpen = drill.model === m.model;
+								return [
+									react.createElement("tr", { key: m.model, className: "tkst-row-click", onClick: () => toggleModelDrill(m.model) },
+										react.createElement("td", null, (isOpen ? "▾ " : "▸ ") + m.model),
+										react.createElement("td", null, deltaSpan(dd)),
+										react.createElement("td", null, m.calls),
+										react.createElement("td", null, fmt(m.total)),
+										react.createElement("td", null, fmtMoney(m.usd)), react.createElement("td", null, fmtCny(m.cny))
+									),
+									isOpen && drillModelSessions
+										? react.createElement("tr", { key: m.model + "-sub" },
+											react.createElement("td", { colSpan: 6, className: "tkst-sub" },
+												react.createElement("table", { className: "tkst-table" },
+													react.createElement("thead", null, react.createElement("tr", null,
+														react.createElement("th", null, t.session), react.createElement("th", null, t.calls),
+														react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd)
+													)),
+													react.createElement("tbody", null, drillModelSessions.map((s) =>
+														react.createElement("tr", { key: s.sessionId },
+															react.createElement("td", null, s.sessionId), react.createElement("td", null, s.calls),
+															react.createElement("td", null, fmt(s.total)),
+															react.createElement("td", null, fmtMoney(s.usd))
+														)))
+												)
+											))
+										: null,
+									isOpen && !drillModelSessions
+										? react.createElement("tr", { key: m.model + "-sub-load" },
+											react.createElement("td", { colSpan: 6, className: "tkst-sub" }, t.loading))
+										: null
+								];
+							})
+						)
 					)
 				),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.bySession),
 					react.createElement("table", { className: "tkst-table" },
 						react.createElement("thead", null, react.createElement("tr", null,
-							react.createElement("th", null, t.session), react.createElement("th", null, t.calls),
-							react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd),
-							react.createElement("th", null, t.costCny)
+							th(t.session, "sessionId", sortSess, setSortSess),
+							th(t.calls, "calls", sortSess, setSortSess),
+							th(t.tokens, "total", sortSess, setSortSess),
+							th(t.costUsd, "usd", sortSess, setSortSess),
+							th(t.costCny, "cny", sortSess, setSortSess)
 						)),
-						react.createElement("tbody", null, sessionRows.map((s) =>
-							react.createElement("tr", { key: s.sessionId },
-								react.createElement("td", null, s.sessionId), react.createElement("td", null, s.calls),
-								react.createElement("td", null, fmt(s.total)),
-								react.createElement("td", null, fmtMoney(s.usd)), react.createElement("td", null, fmtCny(s.cny))
-							)))
+						react.createElement("tbody", null,
+							sessionRows.map((s) => {
+								const isOpen = drill.session === s.sessionId;
+								return [
+									react.createElement("tr", { key: s.sessionId, className: "tkst-row-click", onClick: () => toggleSessionDrill(s.sessionId) },
+										react.createElement("td", null, (isOpen ? "▾ " : "▸ ") + s.sessionId), react.createElement("td", null, s.calls),
+										react.createElement("td", null, fmt(s.total)),
+										react.createElement("td", null, fmtMoney(s.usd)), react.createElement("td", null, fmtCny(s.cny))
+									),
+									isOpen && drillSessionSeries
+										? react.createElement("tr", { key: s.sessionId + "-sub" },
+											react.createElement("td", { colSpan: 5, className: "tkst-sub" },
+												react.createElement("table", { className: "tkst-table" },
+													react.createElement("thead", null, react.createElement("tr", null,
+														react.createElement("th", null, t.day), react.createElement("th", null, t.calls),
+														react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd)
+													)),
+													react.createElement("tbody", null, drillSessionSeries.map((p) =>
+														react.createElement("tr", { key: p.label },
+															react.createElement("td", null, p.label), react.createElement("td", null, p.calls),
+															react.createElement("td", null, fmt(p.total)),
+															react.createElement("td", null, fmtMoney(p.usd))
+														)))
+												)
+											))
+										: null,
+									isOpen && !drillSessionSeries
+										? react.createElement("tr", { key: s.sessionId + "-sub-load" },
+											react.createElement("td", { colSpan: 5, className: "tkst-sub" }, t.loading))
+										: null
+								];
+							})
+						)
 					)
 				),
 				exportText ? react.createElement("div", { className: "tkst-exportbox" },
 					react.createElement("div", null, t.copied),
 					react.createElement("textarea", { readOnly: true, value: exportText })
 				) : null
+				)
 					)
 			);
 		}

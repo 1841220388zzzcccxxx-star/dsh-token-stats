@@ -284,15 +284,24 @@ export function apply(ctx) {
     const today = dateStr(now)
     const ws = weekStart()
     const ms = monthStart()
+    const ystr = dateStr(now - 86400000)
+    const lwStart = ws - 7 * 86400000
+    const lmDate = new Date(now); lmDate.setHours(0, 0, 0, 0); lmDate.setDate(1); lmDate.setMonth(lmDate.getMonth() - 1)
+    const lmStart = lmDate.getTime()
     // single pass over all records, no repeated array filtering
     const d = EMPTY(); const w = EMPTY(); const m = EMPTY(); const t = EMPTY()
+    const yd = EMPTY(); const lw = EMPTY(); const lm = EMPTY()
     let dc = 0; let wc = 0; let mc = 0; let tc = 0
+    let yc = 0; let lwc = 0; let lmc = 0
     for (const r of records.values()) {
       const u = r.usage
       t.input += u.input; t.output += u.output; t.cacheRead += u.cacheRead; t.cacheWrite += u.cacheWrite; t.reasoning += u.reasoning; tc++
       if (r.date === today) { d.input += u.input; d.output += u.output; d.cacheRead += u.cacheRead; d.cacheWrite += u.cacheWrite; d.reasoning += u.reasoning; dc++ }
       if (r.ts >= ws) { w.input += u.input; w.output += u.output; w.cacheRead += u.cacheRead; w.cacheWrite += u.cacheWrite; w.reasoning += u.reasoning; wc++ }
       if (r.ts >= ms) { m.input += u.input; m.output += u.output; m.cacheRead += u.cacheRead; m.cacheWrite += u.cacheWrite; m.reasoning += u.reasoning; mc++ }
+      if (r.date === ystr) { yd.input += u.input; yd.output += u.output; yd.cacheRead += u.cacheRead; yd.cacheWrite += u.cacheWrite; yd.reasoning += u.reasoning; yc++ }
+      if (r.ts >= lwStart && r.ts < ws) { lw.input += u.input; lw.output += u.output; lw.cacheRead += u.cacheRead; lw.cacheWrite += u.cacheWrite; lw.reasoning += u.reasoning; lwc++ }
+      if (r.ts >= lmStart && r.ts < ms) { lm.input += u.input; lm.output += u.output; lm.cacheRead += u.cacheRead; lm.cacheWrite += u.cacheWrite; lm.reasoning += u.reasoning; lmc++ }
     }
     const act = EMPTY()
     for (const u of inflight.values()) {
@@ -305,13 +314,14 @@ export function apply(ctx) {
       calls,
     })
     const day = shape(d, dc); const week = shape(w, wc); const month = shape(m, mc); const total = shape(t, tc)
+    const yesterday = shape(yd, yc); const lastWeek = shape(lw, lwc); const lastMonth = shape(lm, lmc)
     // merge live (inflight, display-only) usage into today/week/month/total
     for (const dst of [day, week, month, total]) {
       dst.input += act.input; dst.output += act.output
       dst.cacheRead += act.cacheRead; dst.cacheWrite += act.cacheWrite; dst.reasoning += act.reasoning
       dst.total += act.input + act.output + act.cacheRead + act.cacheWrite + act.reasoning
     }
-    return { today: day, week, month, total, active: act, backfilled: sessionKeys.size > 0 }
+    return { today: day, week, month, total, prev: { yesterday, lastWeek, lastMonth }, active: act, backfilled: sessionKeys.size > 0 }
   }
 
   const queryPayload = (params) => {
@@ -343,9 +353,24 @@ export function apply(ctx) {
       const a = collect(list, true)
       return { label, input: a.input, output: a.output, total: a.input + a.output + a.cacheRead + a.cacheWrite + a.reasoning, calls: a.calls, usd: a.usd, cny: a.cny }
     })
+    // per-model period-over-period: previous window of the same length
+    // (day -> yesterday, week -> last week, month -> last month)
+    const nowT = Date.now()
+    const prevWindow = (() => {
+      const end = new Date(nowT); end.setHours(0, 0, 0, 0)
+      if (g === 'week') { const ws0 = weekStart(); return { start: ws0 - 7 * 86400000, end: ws0 } }
+      if (g === 'month') { const ms0 = monthStart(); const st = new Date(ms0); st.setMonth(st.getMonth() - 1); return { start: st.getTime(), end: ms0 } }
+      return { start: end.getTime() - 86400000, end: end.getTime() }
+    })()
+    const prevByModel = new Map()
+    for (const r of all) {
+      if (r.ts >= prevWindow.start && r.ts < prevWindow.end) {
+        prevByModel.set(r.model, (prevByModel.get(r.model) || 0) + r.usage.input + r.usage.output + r.usage.cacheRead + r.usage.cacheWrite + r.usage.reasoning)
+      }
+    }
     const models = [...byModel.entries()].map(([model, list]) => {
       const a = collect(list, true)
-      return { model, input: a.input, output: a.output, total: a.input + a.output + a.cacheRead + a.cacheWrite + a.reasoning, calls: a.calls, usd: a.usd, cny: a.cny }
+      return { model, input: a.input, output: a.output, total: a.input + a.output + a.cacheRead + a.cacheWrite + a.reasoning, calls: a.calls, usd: a.usd, cny: a.cny, prevTotal: prevByModel.get(model) || 0 }
     }).sort((a, b) => b.total - a.total)
     const sessions = [...bySession.entries()].map(([sessionId, list]) => {
       const a = collect(list, true)
