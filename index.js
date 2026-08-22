@@ -340,6 +340,7 @@ export function apply(ctx) {
     const byLabel = new Map()
     const byModel = new Map()
     const bySession = new Map()
+    const byLabelModel = new Map()   // label -> Map(model -> total) for stacked trend chart
     for (const r of all) {
       const lb = labelOf(r.ts, g)
       if (!byLabel.has(lb)) byLabel.set(lb, [])
@@ -348,10 +349,16 @@ export function apply(ctx) {
       byModel.get(r.model).push(r)
       if (!bySession.has(r.sessionId)) bySession.set(r.sessionId, [])
       bySession.get(r.sessionId).push(r)
+      let mm = byLabelModel.get(lb)
+      if (!mm) { mm = new Map(); byLabelModel.set(lb, mm) }
+      const u = r.usage
+      mm.set(r.model, (mm.get(r.model) || 0) + u.input + u.output + u.cacheRead + u.cacheWrite + u.reasoning)
     }
     const series = [...byLabel.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1).map(([label, list]) => {
       const a = collect(list, true)
-      return { label, input: a.input, output: a.output, total: a.input + a.output + a.cacheRead + a.cacheWrite + a.reasoning, calls: a.calls, usd: a.usd, cny: a.cny }
+      const mm = byLabelModel.get(label)
+      const models = mm ? [...mm.entries()].map(([model, total]) => ({ model, total })).sort((x, y) => y.total - x.total) : []
+      return { label, input: a.input, output: a.output, total: a.input + a.output + a.cacheRead + a.cacheWrite + a.reasoning, calls: a.calls, usd: a.usd, cny: a.cny, models }
     })
     // per-model period-over-period: previous window of the same length
     // (day -> yesterday, week -> last week, month -> last month)

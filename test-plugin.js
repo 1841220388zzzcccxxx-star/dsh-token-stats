@@ -135,6 +135,9 @@ console.log('== correctness (small corpus: 5 sessions × 1 msg) ==')
   check('query.sessions.length === 5', q.sessions.length === 5, 'got ' + q.sessions.length)
   check('query cost: deepseek-v4-flash usd > 0', q.models.some((m) => m.model.includes('deepseek-v4-flash') && m.usd > 0))
   check('query.models have prevTotal field', q.models.every((m) => typeof m.prevTotal === 'number'))
+  check('query.series have models breakdown', q.series.every((p) => Array.isArray(p.models)))
+  check('series models sum ≈ point total',
+    q.series.every((p) => { const s = p.models.reduce((a, m) => a + m.total, 0); return Math.abs(s - p.total) < 2 }))
 
   // query with model filter
   res = await callHandler(handler, '/token-stats/api?op=query&model=deepseek-chat')

@@ -8,7 +8,7 @@ window.__ModuleLoader__.load({
 
 		//#region styles
 		const css = [
-			".tkst-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}",
+			".tkst-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}",
 			".tkst-card{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px 12px}",
 			".tkst-card .k{font-size:11px;color:var(--dsw-alias-label-secondary)}",
 			".tkst-card .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-primary);margin-top:2px}",
@@ -19,13 +19,16 @@ window.__ModuleLoader__.load({
 			".tkst-filters button:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}",
 			".tkst-filters input[type=text]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 10px;font-size:12px;min-width:160px}",
 			".tkst-filters input[type=text]:focus{border-color:var(--dsw-alias-brand-primary);outline:none}",
-			".tkst-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}",
+			".tkst-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start}",
 			".tkst-grid .tkst-full{grid-column:1 / -1}",
 			".tkst-sec{margin-bottom:16px}",
 			".tkst-sec h4{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}",
 			".tkst-chart{width:100%;height:170px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
-			".tkst-chart rect.tkst-bar-r{fill:var(--dsw-alias-brand-primary);rx:2}",
-			".tkst-chart rect.tkst-bar-r:hover{opacity:.75}",
+			".tkst-chart rect.tkst-bar-r{opacity:.72;transition:opacity .12s}",
+			".tkst-chart rect.tkst-bar-r:hover{opacity:1}",
+			".tkst-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--dsw-alias-label-secondary);margin-bottom:6px}",
+			".tkst-legend .tkst-lg{display:inline-flex;align-items:center;gap:4px}",
+			".tkst-legend .tkst-lg i{display:inline-block;width:10px;height:10px;border-radius:3px}",
 			".tkst-bars{display:flex;flex-direction:column;gap:6px}",
 			".tkst-bar{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:12px;cursor:pointer;padding:2px 4px;border-radius:6px}",
 			".tkst-bar:hover{background:var(--dsw-alias-bg-layer-2)}",
@@ -33,12 +36,14 @@ window.__ModuleLoader__.load({
 			".tkst-bar .track{background:var(--dsw-alias-bg-layer-2);border-radius:5px;height:14px;overflow:hidden}",
 			".tkst-bar .fill{height:100%;background:var(--dsw-alias-brand-primary);border-radius:5px;min-width:2px}",
 			".tkst-bar .v2{color:var(--dsw-alias-label-secondary);text-align:right;font-variant-numeric:tabular-nums}",
+			".tkst-tablewrap{overflow-x:auto;width:100%}",
 			".tkst-table{width:100%;border-collapse:collapse;font-size:12px}",
 			".tkst-table th{text-align:left;color:var(--dsw-alias-label-secondary);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--dsw-alias-border-l1);white-space:nowrap;cursor:pointer;user-select:none}",
 			".tkst-table th:hover{color:var(--dsw-alias-label-primary)}",
 			".tkst-table th.tkst-sort-asc::after{content:' ▲';font-size:9px}",
 			".tkst-table th.tkst-sort-desc::after{content:' ▼';font-size:9px}",
 			".tkst-table td{padding:6px 8px;color:var(--dsw-alias-label-primary);border-bottom:1px solid var(--dsw-alias-border-l1);font-variant-numeric:tabular-nums;white-space:nowrap}",
+			".tkst-table th:first-child,.tkst-table td:first-child{max-width:260px;overflow:hidden;text-overflow:ellipsis}",
 			".tkst-table tr:hover td{background:var(--dsw-alias-bg-layer-1)}",
 			".tkst-table tr.tkst-row-click{cursor:pointer}",
 			".tkst-table tr.tkst-sub td{background:var(--dsw-alias-bg-layer-2);padding-left:24px;border-bottom:1px solid var(--dsw-alias-border-l1)}",
@@ -179,34 +184,72 @@ window.__ModuleLoader__.load({
 			} catch (e) { onFallback(content); }
 		};
 
-		// ---------- trend bar chart (SVG) ----------
+		// ---------- trend chart: thin stacked bars, gridlines, legend ----------
+		const PALETTE = ["#5b8def", "#f28e2b", "#59a14f", "#e15759", "#b07aa1", "#76b7b2", "#edc948", "#9c755f"];
 		function TrendChart({ series }) {
 			const W = 820, H = 160, P = 26;
 			if (!series || series.length === 0) return react.createElement("div", { className: "tkst-empty" }, T().empty);
-			const max = Math.max.apply(null, series.map((s) => s.total)) || 1;
+			// per-point totals (models breakdown if present; fallback to plain total for stale caches)
+			const pointModels = series.map((s) =>
+				Array.isArray(s.models) && s.models.length ? s.models : [{ model: "", total: s.total }]);
+			const totals = pointModels.map((ms) => ms.reduce((a, m) => a + m.total, 0));
+			const max = Math.max.apply(null, totals.concat([1]));
+			// stable model order across all points (by grand total)
+			const grand = new Map();
+			for (const ms of pointModels) for (const m of ms) grand.set(m.model, (grand.get(m.model) || 0) + m.total);
+			const modelNames = [...grand.keys()];
+			const colorOf = (name) => {
+				if (!name) return "var(--dsw-alias-brand-primary)";
+				return PALETTE[modelNames.indexOf(name) % PALETTE.length];
+			};
 			const n = series.length;
 			const slot = (W - 2 * P) / n;
-			const bw = Math.max(2, Math.min(slot * 0.72, 46));
-			const bars = series.map((s, i) => {
-				const h = Math.max(1, (s.total / max) * (H - 2 * P));
-				const x = P + i * slot + (slot - bw) / 2;
-				const y = H - P - h;
-				return react.createElement("rect", {
-					key: i, className: "tkst-bar-r", x: x.toFixed(1), y: y.toFixed(1),
-					width: bw.toFixed(1), height: h.toFixed(1)
-				}, react.createElement("title", null, s.label + " · " + T().tokens + " " + fmt(s.total)));
+			const bw = Math.max(2, Math.min(slot * 0.5, 14));
+			// horizontal dashed gridlines at 25/50/75%
+			const gridLines = [0.25, 0.5, 0.75].map((f, i) => {
+				const y = H - P - f * (H - 2 * P);
+				return react.createElement("line", { key: "g" + i, x1: P, x2: W - P, y1: y.toFixed(1), y2: y.toFixed(1), stroke: "var(--dsw-alias-border-l1)", "stroke-dasharray": "3,4", "stroke-width": 1 });
 			});
+			// stacked thin bars
+			const bars = [];
+			for (let i = 0; i < n; i++) {
+				const ms = pointModels[i];
+				let acc = 0;
+				for (let j = 0; j < ms.length; j++) {
+					const h = Math.max(1, (ms[j].total / max) * (H - 2 * P));
+					const y = H - P - acc - h;
+					acc += h;
+					const tip = [series[i].label + " · " + T().tokens + " " + fmt(totals[i])]
+						.concat(ms.length > 1 || ms[0].model ? ms.map((m) => m.model + ": " + fmt(m.total)) : []).join("\n");
+					bars.push(react.createElement("rect", {
+						key: i + "-" + j, className: "tkst-bar-r",
+						x: (P + i * slot + (slot - bw) / 2).toFixed(1), y: y.toFixed(1),
+						width: bw.toFixed(1), height: h.toFixed(1),
+						fill: colorOf(ms[j].model), rx: j === ms.length - 1 ? 2 : 0
+					}, react.createElement("title", null, tip)));
+				}
+			}
 			const last = series[series.length - 1];
 			const tickIdx = n <= 2 ? [0, n - 1] : [0, Math.floor((n - 1) / 2), n - 1];
-			return react.createElement("svg", { viewBox: "0 0 " + W + " " + H, className: "tkst-chart", preserveAspectRatio: "none" },
-				bars,
-				tickIdx.map((i) => {
-					if (i < 0 || i >= n) return null;
-					const x = P + i * ((W - 2 * P)) / Math.max(n - 1, 1);
-					return react.createElement("text", { key: "t" + i, x: x.toFixed(1), y: H - 8, "font-size": 10, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "middle" }, series[i].label);
-				}),
-				react.createElement("text", { x: W - P, y: 14, "font-size": 11, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "end" },
-					T().tokens + ": " + fmt(last.total))
+			const showLegend = modelNames.filter(Boolean).length > 1;
+			return react.createElement("div", null,
+				showLegend ? react.createElement("div", { className: "tkst-legend" },
+					modelNames.filter(Boolean).map((m) =>
+						react.createElement("span", { key: m, className: "tkst-lg" },
+							react.createElement("i", { style: { background: colorOf(m) } }), m))
+				) : null,
+				react.createElement("svg", { viewBox: "0 0 " + W + " " + H, className: "tkst-chart", preserveAspectRatio: "none" },
+					gridLines,
+					bars,
+					react.createElement("text", { x: P, y: 14, "font-size": 10, fill: "var(--dsw-alias-label-secondary)" }, "≤ " + fmt(max)),
+					tickIdx.map((i) => {
+						if (i < 0 || i >= n) return null;
+						const x = P + i * ((W - 2 * P)) / Math.max(n - 1, 1);
+						return react.createElement("text", { key: "t" + i, x: x.toFixed(1), y: H - 8, "font-size": 10, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "middle" }, series[i].label);
+					}),
+					react.createElement("text", { x: W - P, y: 14, "font-size": 11, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "end" },
+						T().tokens + ": " + fmt(last.total))
+				)
 			);
 		}
 
@@ -397,6 +440,8 @@ window.__ModuleLoader__.load({
 			const deltaSpan = (d) => d
 				? react.createElement("span", { className: "tkst-delta " + d.cls }, d.txt)
 				: null;
+			const shortName = (txt) => (txt && String(txt).length > 30 ? String(txt).slice(0, 29) + "…" : txt);
+			const tableWrap = (el) => react.createElement("div", { className: "tkst-tablewrap" }, el);
 
 			return react.createElement("div", null,
 				err ? react.createElement("div", { className: "tkst-err" }, err) : null,
@@ -486,7 +531,7 @@ window.__ModuleLoader__.load({
 				),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.byModel + " / " + t.bySession),
-					react.createElement("table", { className: "tkst-table" },
+					tableWrap(react.createElement("table", { className: "tkst-table" },
 						react.createElement("thead", null, react.createElement("tr", null,
 							th(t.model, "model", sortModel, setSortModel),
 							th(t.delta, "deltaRatio", sortModel, setSortModel),
@@ -510,18 +555,19 @@ window.__ModuleLoader__.load({
 									isOpen && drillModelSessions
 										? react.createElement("tr", { key: m.model + "-sub" },
 											react.createElement("td", { colSpan: 6, className: "tkst-sub" },
-												react.createElement("table", { className: "tkst-table" },
+												tableWrap(react.createElement("table", { className: "tkst-table" },
 													react.createElement("thead", null, react.createElement("tr", null,
 														react.createElement("th", null, t.session), react.createElement("th", null, t.calls),
 														react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd)
 													)),
 													react.createElement("tbody", null, drillModelSessions.map((s) =>
 														react.createElement("tr", { key: s.sessionId },
-															react.createElement("td", null, s.sessionId), react.createElement("td", null, s.calls),
+															react.createElement("td", { title: s.title || s.sessionId }, shortName(s.title || s.sessionId)),
+															react.createElement("td", null, s.calls),
 															react.createElement("td", null, fmt(s.total)),
 															react.createElement("td", null, fmtMoney(s.usd))
 														)))
-												)
+												))
 											))
 										: null,
 									isOpen && !drillModelSessions
@@ -531,11 +577,11 @@ window.__ModuleLoader__.load({
 								];
 							})
 						)
-					)
+					))
 				),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.bySession),
-					react.createElement("table", { className: "tkst-table" },
+					tableWrap(react.createElement("table", { className: "tkst-table" },
 						react.createElement("thead", null, react.createElement("tr", null,
 							th(t.session, "sessionId", sortSess, setSortSess),
 							th(t.calls, "calls", sortSess, setSortSess),
@@ -548,14 +594,15 @@ window.__ModuleLoader__.load({
 								const isOpen = drill.session === s.sessionId;
 								return [
 									react.createElement("tr", { key: s.sessionId, className: "tkst-row-click", onClick: () => toggleSessionDrill(s.sessionId) },
-										react.createElement("td", null, (isOpen ? "▾ " : "▸ ") + s.sessionId), react.createElement("td", null, s.calls),
+										react.createElement("td", { title: s.sessionId }, (isOpen ? "▾ " : "▸ ") + shortName(s.sessionId)),
+										react.createElement("td", null, s.calls),
 										react.createElement("td", null, fmt(s.total)),
 										react.createElement("td", null, fmtMoney(s.usd)), react.createElement("td", null, fmtCny(s.cny))
 									),
 									isOpen && drillSessionSeries
 										? react.createElement("tr", { key: s.sessionId + "-sub" },
 											react.createElement("td", { colSpan: 5, className: "tkst-sub" },
-												react.createElement("table", { className: "tkst-table" },
+												tableWrap(react.createElement("table", { className: "tkst-table" },
 													react.createElement("thead", null, react.createElement("tr", null,
 														react.createElement("th", null, t.day), react.createElement("th", null, t.calls),
 														react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd)
@@ -566,7 +613,7 @@ window.__ModuleLoader__.load({
 															react.createElement("td", null, fmt(p.total)),
 															react.createElement("td", null, fmtMoney(p.usd))
 														)))
-												)
+												))
 											))
 										: null,
 									isOpen && !drillSessionSeries
@@ -576,7 +623,7 @@ window.__ModuleLoader__.load({
 								];
 							})
 						)
-					)
+					))
 				),
 				exportText ? react.createElement("div", { className: "tkst-exportbox" },
 					react.createElement("div", null, t.copied),
