@@ -23,7 +23,9 @@ window.__ModuleLoader__.load({
 			".tkst-grid .tkst-full{grid-column:1 / -1}",
 			".tkst-sec{margin-bottom:16px}",
 			".tkst-sec h4{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}",
-			".tkst-chart{width:100%;height:170px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
+			".tkst-chart{width:100%;height:230px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
+			".tkst-sumline{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--dsw-alias-label-secondary);margin-bottom:10px;font-variant-numeric:tabular-nums}",
+			".tkst-sumline b{color:var(--dsw-alias-label-primary);font-weight:600}",
 			".tkst-chart rect.tkst-bar-r{opacity:.72;transition:opacity .12s}",
 			".tkst-chart rect.tkst-bar-r:hover{opacity:1}",
 			".tkst-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--dsw-alias-label-secondary);margin-bottom:6px}",
@@ -184,10 +186,10 @@ window.__ModuleLoader__.load({
 			} catch (e) { onFallback(content); }
 		};
 
-		// ---------- trend chart: thin stacked bars, gridlines, legend ----------
-		const PALETTE = ["#5b8def", "#f28e2b", "#59a14f", "#e15759", "#b07aa1", "#76b7b2", "#edc948", "#9c755f"];
+		// ---------- trend chart: slim dense stacked bars, gridlines, legend ----------
+		const PALETTE = ["#8b5cf6", "#06b6d4", "#f59e0b", "#ec4899", "#22c55e", "#ef4444", "#6366f1", "#14b8a6"];
 		function TrendChart({ series }) {
-			const W = 820, H = 160, P = 26;
+			const W = 820, H = 230, P = 24;
 			if (!series || series.length === 0) return react.createElement("div", { className: "tkst-empty" }, T().empty);
 			// per-point totals (models breakdown if present; fallback to plain total for stale caches)
 			const pointModels = series.map((s) =>
@@ -204,33 +206,35 @@ window.__ModuleLoader__.load({
 			};
 			const n = series.length;
 			const slot = (W - 2 * P) / n;
-			const bw = Math.max(2, Math.min(slot * 0.5, 14));
+			const bw = Math.max(2, Math.min(slot * 0.85, 16)); // dense: bars nearly touching
 			// horizontal dashed gridlines at 25/50/75%
 			const gridLines = [0.25, 0.5, 0.75].map((f, i) => {
 				const y = H - P - f * (H - 2 * P);
 				return react.createElement("line", { key: "g" + i, x1: P, x2: W - P, y1: y.toFixed(1), y2: y.toFixed(1), stroke: "var(--dsw-alias-border-l1)", "stroke-dasharray": "3,4", "stroke-width": 1 });
 			});
-			// stacked thin bars
+			// stacked slim bars; tooltip carries calls + cost per point
 			const bars = [];
 			for (let i = 0; i < n; i++) {
 				const ms = pointModels[i];
+				const pt = series[i];
 				let acc = 0;
 				for (let j = 0; j < ms.length; j++) {
 					const h = Math.max(1, (ms[j].total / max) * (H - 2 * P));
 					const y = H - P - acc - h;
 					acc += h;
-					const tip = [series[i].label + " · " + T().tokens + " " + fmt(totals[i])]
-						.concat(ms.length > 1 || ms[0].model ? ms.map((m) => m.model + ": " + fmt(m.total)) : []).join("\n");
+					const lines = [series[i].label + " · " + fmt(totals[i]) + " tk"];
+					lines.push(t.calls + " " + pt.calls + " · " + fmtMoney(pt.usd) + " / " + fmtCny(pt.cny));
+					if (ms.length > 1 || ms[0].model) for (const m of ms) lines.push("· " + m.model + ": " + fmt(m.total));
 					bars.push(react.createElement("rect", {
 						key: i + "-" + j, className: "tkst-bar-r",
-						x: (P + i * slot + (slot - bw) / 2).toFixed(1), y: y.toFixed(1),
-						width: bw.toFixed(1), height: h.toFixed(1),
-						fill: colorOf(ms[j].model), rx: j === ms.length - 1 ? 2 : 0
-					}, react.createElement("title", null, tip)));
+						x: (P + i * slot).toFixed(2), y: y.toFixed(1),
+						width: bw.toFixed(2), height: h.toFixed(1),
+						fill: colorOf(ms[j].model), rx: j === ms.length - 1 ? 1.5 : 0
+					}, react.createElement("title", null, lines.join("\n"))));
 				}
 			}
-			const last = series[series.length - 1];
-			const tickIdx = n <= 2 ? [0, n - 1] : [0, Math.floor((n - 1) / 2), n - 1];
+			const tickIdx = n <= 4 ? [0, n - 1]
+				: [0, Math.round((n - 1) / 4), Math.round((n - 1) / 2), Math.round((3 * (n - 1)) / 4), n - 1];
 			const showLegend = modelNames.filter(Boolean).length > 1;
 			return react.createElement("div", null,
 				showLegend ? react.createElement("div", { className: "tkst-legend" },
@@ -241,14 +245,12 @@ window.__ModuleLoader__.load({
 				react.createElement("svg", { viewBox: "0 0 " + W + " " + H, className: "tkst-chart", preserveAspectRatio: "none" },
 					gridLines,
 					bars,
-					react.createElement("text", { x: P, y: 14, "font-size": 10, fill: "var(--dsw-alias-label-secondary)" }, "≤ " + fmt(max)),
-					tickIdx.map((i) => {
+					react.createElement("text", { x: P, y: 13, "font-size": 10, fill: "var(--dsw-alias-label-secondary)" }, "≤ " + fmt(max)),
+					tickIdx.map((i, k) => {
 						if (i < 0 || i >= n) return null;
 						const x = P + i * ((W - 2 * P)) / Math.max(n - 1, 1);
-						return react.createElement("text", { key: "t" + i, x: x.toFixed(1), y: H - 8, "font-size": 10, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "middle" }, series[i].label);
-					}),
-					react.createElement("text", { x: W - P, y: 14, "font-size": 11, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "end" },
-						T().tokens + ": " + fmt(last.total))
+						return react.createElement("text", { key: "t" + k, x: x.toFixed(1), y: H - 7, "font-size": 10, fill: "var(--dsw-alias-label-secondary)", "text-anchor": k === 0 ? "start" : k === tickIdx.length - 1 ? "end" : "middle" }, series[i].label);
+					})
 				)
 			);
 		}
@@ -413,9 +415,11 @@ window.__ModuleLoader__.load({
 				...m,
 				deltaRatio: m.prevTotal > 0 ? m.total / m.prevTotal : (m.prevTotal === 0 && m.total > 0 ? Infinity : 0),
 			}));
-			const modelRows = sortRows(modelRowsWithDelta, sortModel.key, sortModel.dir).slice(0, 12);
-			const sessionRows = sortRows(sessionRowsAll, sortSess.key, sortSess.dir).slice(0, 12);
+			const modelRows = sortRows(modelRowsWithDelta, sortModel.key, sortModel.dir).slice(0, 20);
+			const sessionRows = sortRows(sessionRowsAll, sortSess.key, sortSess.dir).slice(0, 20);
 			const series = q && q.series ? q.series : [];
+			// day granularity: dense view of the most recent 30 points
+			const trendSeries = gran === "day" && series.length > 30 ? series.slice(-30) : series;
 			const isLoading = loading && !summary && !q;
 
 			// session search: fuzzy match on id/title
@@ -428,6 +432,10 @@ window.__ModuleLoader__.load({
 			// drill-down rows for the expanded model / session
 			const drillModelSessions = drill.model && drillData.model ? drillData.model : null;
 			const drillSessionSeries = drill.session && drillData.session ? drillData.session : null;
+
+			// summary strip under the cards: grand totals incl. cost (from unfiltered model aggregate)
+			const sumUsd = q0 && q0.models ? q0.models.reduce((a, m) => a + (m.usd || 0), 0) : null;
+			const sumCny = q0 && q0.models ? q0.models.reduce((a, m) => a + (m.cny || 0), 0) : null;
 
 			const th = (label, sort, state, setState) => {
 				const cls = state.key === sort ? (state.dir === 1 ? "tkst-sort-asc" : "tkst-sort-desc") : "";
@@ -465,6 +473,17 @@ window.__ModuleLoader__.load({
 							react.createElement("div", { className: "k" }, "—"),
 							react.createElement("div", { className: "v" }, "—"),
 							react.createElement("div", { className: "s" }, "")))),
+				react.createElement("div", { className: "tkst-sumline" },
+					summary ? [
+						react.createElement("span", { key: "tk" }, "Σ " + t.tokens + " "),
+						react.createElement("b", { key: "tkv" }, fmt(summary.total.total)),
+						react.createElement("span", { key: "usd" }, t.costUsd + " "),
+						react.createElement("b", { key: "usdv" }, fmtMoney(sumUsd)),
+						react.createElement("span", { key: "cny" }, t.costCny + " "),
+						react.createElement("b", { key: "cnyv" }, fmtCny(sumCny)),
+						react.createElement("span", { key: "cl" }, t.calls + " "),
+						react.createElement("b", { key: "clv" }, String(summary.total.calls))
+					] : null),
 				react.createElement("div", { className: "tkst-filters" },
 					react.createElement("span", null, t.granularity),
 					react.createElement("select", { value: gran, onChange: (e) => setGran(e.target.value) },
@@ -513,7 +532,7 @@ window.__ModuleLoader__.load({
 						react.createElement("h4", null, t.trend),
 						series.length === 0 && !q
 							? react.createElement("div", { className: "tkst-empty" }, t.loading)
-							: react.createElement(TrendChart, { series: series })
+							: react.createElement(TrendChart, { series: trendSeries })
 					)),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.byModel),
