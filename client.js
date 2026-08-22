@@ -34,7 +34,13 @@ window.__ModuleLoader__.load({
 			".tkst-rate{font-size:11px;color:var(--dsw-alias-label-secondary);margin-left:auto;padding-right:4px}",
 			".tkst-exportbox{margin-top:10px;padding:10px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:8px}",
 			".tkst-exportbox textarea{width:100%;height:120px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:6px;font-size:11px;padding:8px;font-family:ui-monospace,Consolas,monospace}",
-			".tkst-err{margin:8px 0;padding:8px 10px;background:var(--dsw-alias-state-error-primary);color:#fff;border-radius:8px;font-size:12px;white-space:pre-wrap}"
+			".tkst-err{margin:8px 0;padding:8px 10px;background:var(--dsw-alias-state-error-primary);color:#fff;border-radius:8px;font-size:12px;white-space:pre-wrap}",
+			".tkst-loading{display:flex;align-items:center;gap:8px;color:var(--dsw-alias-label-secondary);font-size:12px;padding:16px;justify-content:center}",
+			".tkst-spin{width:14px;height:14px;border:2px solid var(--dsw-alias-border-l1);border-top-color:var(--dsw-alias-brand-primary);border-radius:50%;animation:tkst-rot .8s linear infinite}",
+			"@keyframes tkst-rot{to{transform:rotate(360deg)}}",
+			".tkst-meta{font-size:11px;color:var(--dsw-alias-label-secondary);margin-left:auto;padding-right:4px;white-space:nowrap}",
+			".tkst-btn-refresh{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}",
+			".tkst-btn-refresh:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}"
 		].join("");
 		const tagId = "dsh-token-stats/style";
 		if (typeof document !== "undefined" && document.querySelector("style[data-plugin-css=" + JSON.stringify(tagId) + "]") === null) {
@@ -61,7 +67,8 @@ window.__ModuleLoader__.load({
 				granularity: "时间粒度", day: "按天", weekG: "按周", monthG: "按月", allModels: "全部模型",
 				allSessions: "全部会话", trend: "用量趋势", byModel: "按模型统计", bySession: "按会话统计",
 				exportCsv: "导出 CSV", exportJson: "导出 JSON", empty: "暂无数据",
-				estimated: "含估算", usdRate: "汇率", copied: "导出内容已生成（浏览器限制，请手动复制下方内容）"
+				estimated: "含估算", usdRate: "汇率", copied: "导出内容已生成（浏览器限制，请手动复制下方内容）",
+				refresh: "刷新", loading: "加载中…", updating: "刷新中…", updatedAt: "最后更新"
 			},
 			en: {
 				title: "📊 Token Stats", today: "Today", week: "Week", month: "Month", total: "Total",
@@ -70,7 +77,8 @@ window.__ModuleLoader__.load({
 				granularity: "Granularity", day: "Day", weekG: "Week", monthG: "Month", allModels: "All models",
 				allSessions: "All sessions", trend: "Usage Trend", byModel: "By Model", bySession: "By Session",
 				exportCsv: "Export CSV", exportJson: "Export JSON", empty: "No data",
-				estimated: "incl. estimated", usdRate: "Rate", copied: "Export content generated (browser limits, copy manually below)"
+				estimated: "incl. estimated", usdRate: "Rate", copied: "Export content generated (browser limits, copy manually below)",
+				refresh: "Refresh", loading: "Loading…", updating: "Refreshing…", updatedAt: "Updated"
 			}
 		};
 		const T = () => (isZh() ? DICT.zh : DICT.en);
@@ -92,6 +100,28 @@ window.__ModuleLoader__.load({
 			const data = await res.json();
 			if (!data || data.ok !== true) throw new Error((data && data.error) || "api error");
 			return data;
+		};
+
+		// ---------- sessionStorage cache (stale-while-revalidate) ----------
+		// Opening the tab / switching filters renders the previous result instantly,
+		// then refreshes in the background — no blank wait, no flicker.
+		const cacheGet = (key) => {
+			try {
+				const raw = sessionStorage.getItem(key);
+				return raw ? JSON.parse(raw) : null;
+			} catch (e) { return null; }
+		};
+		const cacheSet = (key, val) => {
+			try { sessionStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* quota */ }
+		};
+		const C_SUMMARY = "tkst.summary.v1";
+		const C_META = "tkst.meta.v1";
+		const C_SESSIONS = "tkst.sessions.v1";
+		const C_QUERY = (gran, model, session) =>
+			"tkst.query.v1|" + (gran || "day") + "|" + (model || "*") + "|" + (session || "*");
+		const fmtTime = (d) => {
+			const p = (n) => String(n).padStart(2, "0");
+			return p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
 		};
 
 		const download = (filename, content, onFallback) => {
@@ -142,10 +172,23 @@ window.__ModuleLoader__.load({
 			const [sessions, setSessions] = react.useState([]);
 			const [exportText, setExportText] = react.useState("");
 			const [err, setErr] = react.useState("");
+			const [loading, setLoading] = react.useState(true);      // initial load (no data yet)
+			const [updating, setUpdating] = react.useState(false);   // background refresh in progress
+			const [updatedAt, setUpdatedAt] = react.useState(null);  // last successful refresh time
+			const [refreshTick, setRefreshTick] = react.useState(0); // manual refresh trigger
 
-			// mount-only: static data (sessions/models) + summary; filters do not affect them
+			// mount + manual refresh: static data (sessions/models) + summary, cached
 			react.useEffect(() => {
 				let alive = true;
+				// 1) instant paint from cache (stale-while-revalidate)
+				const cSum = cacheGet(C_SUMMARY);
+				const cMeta = cacheGet(C_META);
+				const cSess = cacheGet(C_SESSIONS);
+				if (cSum) { setSummary(cSum); setLoading(false); }
+				if (cMeta) setMeta(cMeta);
+				if (cSess) setSessions(cSess.sessions || []);
+				// 2) background refresh
+				setUpdating(true);
 				const load = async () => {
 					try {
 						const [sum, metaRes, sessRes] = await Promise.all([
@@ -155,42 +198,56 @@ window.__ModuleLoader__.load({
 						]);
 						if (!alive) return;
 						setErr("");
+						setLoading(false); setUpdating(false);
 						setSummary(sum); setMeta(metaRes); setSessions(sessRes.sessions || []);
+						setUpdatedAt(new Date());
+						cacheSet(C_SUMMARY, sum); cacheSet(C_META, metaRes); cacheSet(C_SESSIONS, sessRes);
 					} catch (e) {
-						if (alive) setErr("API 错误: " + String(e && e.message ? e.message : e));
+						if (alive) { setLoading(false); setUpdating(false); setErr("API 错误: " + String(e && e.message ? e.message : e)); }
 					}
 				};
 				load();
-				// keep the summary cards (incl. live in-flight usage) fresh while the tab is open
+				// 3) quiet auto-refresh of summary cards while the tab is open
 				const timer = setInterval(() => {
-					api("summary", {}).then((sum) => { if (alive) setSummary(sum); }).catch(() => {});
-				}, 60000);
+					api("summary", {}).then((sum) => {
+						if (alive) { setSummary(sum); setUpdatedAt(new Date()); cacheSet(C_SUMMARY, sum); }
+					}).catch(() => {});
+				}, 30000);
 				return () => { alive = false; clearInterval(timer); };
-			}, []);
+			}, [refreshTick]);
 
-			// filter-dependent: only the query endpoint is refetched
+			// filter-dependent: query endpoint only, cached per filter combo
 			react.useEffect(() => {
 				let alive = true;
+				const params = {};
+				if (gran) params.granularity = gran;
+				if (model) params.model = model;
+				if (session) params.sessionId = session;
+				// 1) instant paint from cache
+				const cQ = cacheGet(C_QUERY(gran, model, session));
+				if (cQ) {
+					setQ(cQ);
+					if (!model && !session && cQ.models) setQ0(cQ);
+				}
+				// 2) background refresh (keep previous data visible while it runs)
 				const load = async () => {
 					try {
-						const params = {};
-						if (gran) params.granularity = gran;
-						if (model) params.model = model;
-						if (session) params.sessionId = session;
 						const res = await api("query", params);
 						if (!alive) return;
 						setErr("");
 						setQ(res);
+						setUpdatedAt(new Date());
 						// keep the model dropdown fed by the unfiltered dataset only,
 						// so a session filter cannot narrow the model list
 						if (!model && !session && res && res.models) setQ0(res);
+						cacheSet(C_QUERY(gran, model, session), res);
 					} catch (e) {
 						if (alive) setErr("API 错误: " + String(e && e.message ? e.message : e));
 					}
 				};
 				load();
 				return () => { alive = false; };
-			}, [gran, model, session]);
+			}, [gran, model, session, refreshTick]);
 
 			const t = T();
 			const doExport = async (format) => {
@@ -214,22 +271,34 @@ window.__ModuleLoader__.load({
 				[t.week, fmt(summary.week.total), t.calls + " " + summary.week.calls],
 				[t.month, fmt(summary.month.total), t.calls + " " + summary.month.calls],
 				[t.total, fmt(summary.total.total), t.calls + " " + summary.total.calls]
-			] : [[t.today, "—", ""], [t.week, "—", ""], [t.month, "—", ""], [t.total, "—", ""]];
+			] : null;
 
 			const modelOptions = (q0 && q0.models ? q0.models : q && q.models ? q.models : []).map((m) => m.model);
 			const uniqueModels = modelOptions.filter((v, i, a) => a.indexOf(v) === i);
 			const modelRows = (q && q.models ? q.models : []).slice(0, 12);
 			const sessionRows = (q && q.sessions ? q.sessions : []).slice(0, 12);
 			const series = q && q.series ? q.series : [];
+			const isLoading = loading && !summary && !q;
 
 			return react.createElement("div", null,
 				err ? react.createElement("div", { className: "tkst-err" }, err) : null,
-				react.createElement("div", { className: "tkst-cards" }, cards.map((c, i) =>
-					react.createElement("div", { className: "tkst-card", key: i },
-						react.createElement("div", { className: "k" }, c[0]),
-						react.createElement("div", { className: "v" }, c[1]),
-						react.createElement("div", { className: "s" }, c[2])
-					))),
+				isLoading
+					? react.createElement("div", { className: "tkst-loading" },
+						react.createElement("span", { className: "tkst-spin" }),
+						react.createElement("span", null, t.loading))
+					: react.createElement("div", null,
+				react.createElement("div", { className: "tkst-cards" },
+					cards ? cards.map((c, i) =>
+						react.createElement("div", { className: "tkst-card", key: i },
+							react.createElement("div", { className: "k" }, c[0]),
+							react.createElement("div", { className: "v" }, c[1]),
+							react.createElement("div", { className: "s" }, c[2])
+						))
+					: [0, 1, 2, 3].map((i) =>
+						react.createElement("div", { className: "tkst-card", key: i },
+							react.createElement("div", { className: "k" }, "—"),
+							react.createElement("div", { className: "v" }, "—"),
+							react.createElement("div", { className: "s" }, "")))),
 				react.createElement("div", { className: "tkst-filters" },
 					react.createElement("span", null, t.granularity),
 					react.createElement("select", { value: gran, onChange: (e) => setGran(e.target.value) },
@@ -245,14 +314,20 @@ window.__ModuleLoader__.load({
 						react.createElement("option", { value: "" }, t.allSessions),
 						sessions.map((s) => react.createElement("option", { key: s.id, value: s.id }, s.title))
 					),
+					react.createElement("button", { onClick: () => setRefreshTick((x) => x + 1), title: t.refresh },
+						updating ? t.updating : "↻ " + t.refresh),
 					react.createElement("button", { onClick: () => doExport("csv") }, t.exportCsv),
 					react.createElement("button", { onClick: () => doExport("json") }, t.exportJson),
 					react.createElement("span", { className: "tkst-rate" },
-						meta ? t.usdRate + " 1 USD = " + meta.usdCny + " CNY · " + t.estimated : "")
+						meta ? t.usdRate + " 1 USD = " + meta.usdCny + " CNY · " + t.estimated : ""),
+					updatedAt ? react.createElement("span", { className: "tkst-meta" },
+						t.updatedAt + " " + fmtTime(updatedAt)) : null
 				),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.trend),
-					react.createElement(LineChart, { series: series })
+					series.length === 0 && !q
+						? react.createElement("div", { className: "tkst-empty" }, t.loading)
+						: react.createElement(LineChart, { series: series })
 				),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.byModel),
@@ -306,6 +381,7 @@ window.__ModuleLoader__.load({
 					react.createElement("div", null, t.copied),
 					react.createElement("textarea", { readOnly: true, value: exportText })
 				) : null
+					)
 			);
 		}
 
