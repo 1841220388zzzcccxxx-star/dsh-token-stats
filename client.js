@@ -222,8 +222,8 @@ window.__ModuleLoader__.load({
 					const h = Math.max(1, (ms[j].total / max) * (H - 2 * P));
 					const y = H - P - acc - h;
 					acc += h;
-					const lines = [series[i].label + " · " + fmt(totals[i]) + " tk"];
-					lines.push(t.calls + " " + pt.calls + " · " + fmtMoney(pt.usd) + " / " + fmtCny(pt.cny));
+					const lines = [series[i].label + " · " + fmt(totals[i]) + " " + T().tokens];
+					lines.push(T().calls + " " + pt.calls + " · " + fmtMoney(pt.usd) + " / " + fmtCny(pt.cny));
 					if (ms.length > 1 || ms[0].model) for (const m of ms) lines.push("· " + m.model + ": " + fmt(m.total));
 					bars.push(react.createElement("rect", {
 						key: i + "-" + j, className: "tkst-bar-r",
@@ -253,6 +253,20 @@ window.__ModuleLoader__.load({
 					})
 				)
 			);
+		}
+
+		// error boundary: a render bug must show a message, never a blank page
+		class StatsErrorBoundary extends react.Component {
+			constructor(props) { super(props); this.state = { err: null }; }
+			static getDerivedStateFromError(e) { return { err: e }; }
+			componentDidCatch(e) { try { console.error("[token-stats] render error", e); } catch (x) { /* noop */ } }
+			render() {
+				if (this.state.err) {
+					const msg = String((this.state.err && this.state.err.message) || this.state.err);
+					return react.createElement("div", { className: "tkst-err" }, "[token-stats] 渲染错误: " + msg);
+				}
+				return this.props.children;
+			}
 		}
 
 		// ---------- full stats page (settings section) ----------
@@ -662,7 +676,8 @@ window.__ModuleLoader__.load({
 				id: "token-stats",
 				order: 25,
 				label: () => T().title
-			}, () => react.createElement(StatsView, {})));
+		}, () => react.createElement(StatsErrorBoundary, null,
+			react.createElement(StatsView, {}))));
 		}
 
 		exports.apply = apply;
