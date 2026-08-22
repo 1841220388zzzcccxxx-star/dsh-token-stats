@@ -1,0 +1,74 @@
+<!-- handoff:auto:start -->
+# 项目交接
+
+## 项目概况
+
+- 项目名称：dsh-token-stats — DeepSeek Harness Token 用量统计插件
+- 用途：统计 DSH 各模型/日期/会话的 token 用量与费用（USD/CNY），设置面板 → 📊 Token 统计 页签展示；DSH 外部插件，随启动自动加载
+- 技术栈：Node.js ESM + Cordis 插件（服务端 index.js / 客户端 client.js）；前端零第三方依赖（原生 SVG/React 运行时）；PowerShell 部署脚本
+- 主要入口：index.js（服务端：事件采集/回溯/聚合//token-stats/api）；client.js（浏览器：settings.section 页签）；cordis.patch.yml（bundle 挂载点）；sync-deploy.ps1（部署）
+
+## 当前状态
+
+- 状态：功能可运行并已推送 GitHub 开源仓库；最近一次修复了“页面全白”崩溃（TrendChart 中未定义变量 t）
+- 最后更新：2026-08-22T19:35:55+08:00
+
+## 本次变更
+
+本轮：修复白屏崩溃——TrendChart 悬停 tooltip 误用未定义的 t.calls（应为 T().calls），导致渲染抛 ReferenceError 页面空白；新增 StatsErrorBoundary 错误边界（渲染错误显示红色错误条而非白屏）；新增 test-client-refs.js（stub 环境加载 client.js，用 30/60/2 天真实数据伪执行 TrendChart，抓语法检查看不到的未定义引用）
+
+## 验证结果
+
+node --check 两文件通过；node test-plugin.js 35 项全过；node test-client-refs.js 13 项全过；已 sync-deploy 并核对部署副本含修复；git push 成功
+
+## 待办与阻塞
+
+用户需重启 DSH web 使最新 client.js 生效；README.md 截图仍为旧版界面，待重启后补新截图
+
+## 常用命令
+
+sync-deploy.ps1（改源码后同步到 profile，需重启 DSH）；node test-plugin.js（服务端测试）；node test-client-refs.js（前端引用/渲染检查）；node --check index.js / client.js
+
+## 交接记录
+
+<!-- handoff:history:start -->
+- [2026-08-22T19:35:55+08:00] 目标：修复 Token 统计页白屏崩溃并做回归验证；结果：已完成：修复 t 未定义引用，加错误边界，新增前端引用测试，已部署并推送（commit 6f5df43）；下一步：用户重启 DSH web 验收；后续可选：费用卡片+预算条 / 时间范围快捷键 / ECharts 交互图 / 偏好记忆；README 截图更新
+<!-- handoff:history:end -->
+<!-- handoff:auto:end -->
+
+## 人工补充
+
+### 版本与修改历史（git 提交时间序）
+
+| 版本/提交 | 内容 |
+|---|---|
+| `c7a60c2` Initial commit | 初版：会话日志采集、历史回溯、/token-stats/api、设置页统计页签、CSV/JSON 导出 |
+| `b53474c` | 开源准备：README 中英双语、MIT LICENSE、.gitignore、docs/demo.png 界面截图 |
+| `9ce8088` Perf | 性能优化：sessions 批量读标题+缓存（1.7s→12ms）、summary 单次遍历、单价/费用记忆化、backfill 并发；前端 stale-while-revalidate 缓存、60s 自动刷新、手动刷新按钮、「最后更新」时间戳 |
+| `451cc01` UI | 双列网格、会话搜索框、表格列头排序、卡片+模型表环比、三层钻取（模型→会话→每日明细）；服务端 summary.prev + models.prevTotal |
+| `3a406bd` UI | 趋势折线图→可悬停柱状图 |
+| `d34c78b` UI | 细柱+圆角+网格线+按模型堆叠柱（series.models）+修复设置页横向溢出（响应式 grid、tablewrap、会话名截断） |
+| `488217e` UI | 堆叠柱压密（柱宽85%）、图表加高 230px、近 30 天、鲜亮 8 色板、顶部汇总条、表格 20 行、tooltip 加调用+费用 |
+| `6f5df43` Fix | **修复白屏崩溃**（见历史问题）+ StatsErrorBoundary 错误边界 + test-client-refs.js |
+| 当前 HEAD | `6f5df43` on `main`，与 `origin/main` 同步 |
+
+### 升级 / 部署方法
+
+1. 改完源码后：`.\sync-deploy.ps1`（直接把 index.js/client.js/package.json/cordis.patch.yml 复制到 `C:\Users\18412\.dsh\profiles\web\node_modules\dsh-token-stats` 再 `pnpm install`）。
+   - 注意：pnpm 对 `file:` 依赖在 package.json 未变化时会**跳过**刷新副本，所以脚本必须手动先复制文件（已处理）。
+2. **必须重启 DSH web**，新代码才加载（外部插件无 HMR）。
+3. 云端：改完 `git add -A && git commit && git push origin main`（推送需临时 token 认证，token 用完在 GitHub 删除）。
+
+### 历史问题与踩坑记录
+
+- **白屏崩溃（已修，commit 6f5df43）**：`TrendChart` 是模块级函数，作用域内没有 `t` 变量（`t=T()` 只在 `StatsView` 内），tooltip 误用 `t.calls` → `ReferenceError` → React 整树卸载 → 页面全白。教训：组件外函数取词必须用 `T()`，且这类"变量未定义" `node --check` 查不出，需引用级伪执行测试（test-client-refs.js）。
+- **pnpm 跳过副本刷新**：`file:` 依赖 package.json 未变时 `pnpm install` 不更新 node_modules 副本，改源码后必须手动 Copy-Item（sync-deploy.ps1 已内置）。
+- **PowerShell 编码**：① `.ps1` 中文在 GBK 解析环境会乱码/报语法错 → 脚本需 UTF-8 BOM；② PowerShell→Python 传中文 argv 会被破坏 → 大段中文 JSON 数据需写临时 UTF-8 文件由 Python 侧读取；③ PowerShell `Invoke-RestMethod` 发中文 JSON body 会变 `?????` → 用 UTF-8 字节数组作 body。
+- **GitHub 描述中文损坏**：第一次 PATCH description 中文变问号，改用 UTF-8 字节 body 后正常。
+- **旧代码残留**：线上实例重启前一直加载旧代码，改完必须重启才能验证新效果；判断新代码是否生效可用 API 耗时对比（如 sessions ~11ms 为新版，~1500ms 为旧版）。
+- **前端无法直接单测**：client.js 是 `window.__ModuleLoader__.load` 包裹，node 直接跑不了；test-client-refs.js 用 stub 环境 + 真实数据伪执行覆盖渲染路径。
+
+### 已知待办（非阻塞）
+
+- README.md 截图（docs/demo.png）还是旧版 UI，重启后建议重截一张替换。
+- 后续可选优化（未做）：费用卡片+月度预算进度条 / 时间范围快捷按钮（近7天/30天）/ ECharts 交互图 / 用户偏好记忆（granularity/排序存 localStorage）。
