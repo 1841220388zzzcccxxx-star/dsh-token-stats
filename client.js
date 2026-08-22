@@ -24,6 +24,8 @@ window.__ModuleLoader__.load({
 			".tkst-sec{margin-bottom:16px}",
 			".tkst-sec h4{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}",
 			".tkst-chart{width:100%;height:170px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
+			".tkst-chart rect.tkst-bar-r{fill:var(--dsw-alias-brand-primary);rx:2}",
+			".tkst-chart rect.tkst-bar-r:hover{opacity:.75}",
 			".tkst-bars{display:flex;flex-direction:column;gap:6px}",
 			".tkst-bar{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:12px;cursor:pointer;padding:2px 4px;border-radius:6px}",
 			".tkst-bar:hover{background:var(--dsw-alias-bg-layer-2)}",
@@ -177,25 +179,31 @@ window.__ModuleLoader__.load({
 			} catch (e) { onFallback(content); }
 		};
 
-		// ---------- line chart (SVG) ----------
-		function LineChart({ series }) {
+		// ---------- trend bar chart (SVG) ----------
+		function TrendChart({ series }) {
 			const W = 820, H = 160, P = 26;
 			if (!series || series.length === 0) return react.createElement("div", { className: "tkst-empty" }, T().empty);
 			const max = Math.max.apply(null, series.map((s) => s.total)) || 1;
 			const n = series.length;
-			const pts = series.map((s, i) => {
-				const x = P + (i * (W - 2 * P)) / Math.max(n - 1, 1);
-				const y = H - P - (s.total / max) * (H - 2 * P);
-				return x.toFixed(1) + "," + y.toFixed(1);
-			}).join(" ");
+			const slot = (W - 2 * P) / n;
+			const bw = Math.max(2, Math.min(slot * 0.72, 46));
+			const bars = series.map((s, i) => {
+				const h = Math.max(1, (s.total / max) * (H - 2 * P));
+				const x = P + i * slot + (slot - bw) / 2;
+				const y = H - P - h;
+				return react.createElement("rect", {
+					key: i, className: "tkst-bar-r", x: x.toFixed(1), y: y.toFixed(1),
+					width: bw.toFixed(1), height: h.toFixed(1)
+				}, react.createElement("title", null, s.label + " · " + T().tokens + " " + fmt(s.total)));
+			});
 			const last = series[series.length - 1];
-			const tickIdx = [0, Math.floor((n - 1) / 2), n - 1];
+			const tickIdx = n <= 2 ? [0, n - 1] : [0, Math.floor((n - 1) / 2), n - 1];
 			return react.createElement("svg", { viewBox: "0 0 " + W + " " + H, className: "tkst-chart", preserveAspectRatio: "none" },
-				react.createElement("polyline", { points: pts, fill: "none", stroke: "var(--dsw-alias-brand-primary)", "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }),
+				bars,
 				tickIdx.map((i) => {
 					if (i < 0 || i >= n) return null;
-					const x = P + (i * (W - 2 * P)) / Math.max(n - 1, 1);
-					return react.createElement("text", { key: i, x: x, y: H - 8, "font-size": 10, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "middle" }, series[i].label);
+					const x = P + i * ((W - 2 * P)) / Math.max(n - 1, 1);
+					return react.createElement("text", { key: "t" + i, x: x.toFixed(1), y: H - 8, "font-size": 10, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "middle" }, series[i].label);
 				}),
 				react.createElement("text", { x: W - P, y: 14, "font-size": 11, fill: "var(--dsw-alias-label-secondary)", "text-anchor": "end" },
 					T().tokens + ": " + fmt(last.total))
@@ -460,7 +468,7 @@ window.__ModuleLoader__.load({
 						react.createElement("h4", null, t.trend),
 						series.length === 0 && !q
 							? react.createElement("div", { className: "tkst-empty" }, t.loading)
-							: react.createElement(LineChart, { series: series })
+							: react.createElement(TrendChart, { series: series })
 					)),
 				react.createElement("div", { className: "tkst-sec" },
 					react.createElement("h4", null, t.byModel),
