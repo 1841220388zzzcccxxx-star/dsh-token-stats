@@ -10,20 +10,20 @@
 
 ## 当前状态
 
-- 状态：功能可运行并已推送 GitHub 开源仓库；最近一次修复了“页面全白”崩溃（TrendChart 中未定义变量 t）
-- 最后更新：2026-08-22T19:35:55+08:00
+- 状态：功能可运行；本轮完成设置页布局重构（单列全宽：去左右分栏、去重复横条列表、间距字号全面放大）
+- 最后更新：2026-09-22T10:54:00+08:00
 
 ## 本次变更
 
-本轮：修复白屏崩溃——TrendChart 悬停 tooltip 误用未定义的 t.calls（应为 T().calls），导致渲染抛 ReferenceError 页面空白；新增 StatsErrorBoundary 错误边界（渲染错误显示红色错误条而非白屏）；新增 test-client-refs.js（stub 环境加载 client.js，用 30/60/2 天真实数据伪执行 TrendChart，抓语法检查看不到的未定义引用）
+本轮（用户反馈"列表长且丑 / 左右分栏乱 / 太紧凑"）：页面由「双列 split」改为单列垂直流。① 删除 `.tkst-split` 左右分栏与左栏重复的「按模型统计」横条列表（`tkst-bars`，模型名被截断且与右侧表格数据重复）；模型统计只保留全宽表格一份。② 工具栏拆两行：控件行（粒度分段/模型筛选/会话搜索/刷新/导出）+ 汇总 chips 行（Σ tokens/费用/调用/汇率/更新时间）。③ 间距字号全面放大：page gap 14→18、panel padding 10/12→16/18、表格行 padding 7/10→9/14 且字号 12→13、max-height 420→480、卡片 padding 与字号上调、圆角 12→14、输入框 min-width 160→200。④ 会话表显示标题：新增 `sessTitleMap`（join `op=sessions` 的 title），不再展示原始 UUID；费用构成/模型/会话三个分区表头加计数 meta。⑤ 清理死 CSS（tkst-grid/tkst-bars/tkst-split）。测试锚点保持不变（`slot * 0.85`、`H = 230`、`tkst-grad-` 等），`node --check` + test-client-refs（14 项）+ test-plugin（35 项）全过。
 
 ## 验证结果
 
-node --check 两文件通过；node test-plugin.js 35 项全过；node test-client-refs.js 13 项全过；已 sync-deploy 并核对部署副本含修复；git push 成功
+node --check 两文件通过；node test-client-refs.js 14 项全过；node test-plugin.js 35 项全过；本轮已 sync-deploy，待重启验收。
 
 ## 待办与阻塞
 
-用户需重启 DSH web 使最新 client.js 生效；README.md 截图仍为旧版界面，待重启后补新截图
+用户需重启 DSH web 使新 client.js 生效；README 截图 docs/demo.png 仍是旧版 UI（旧布局/分栏版），建议重启后重截。
 
 ## 常用命令
 
@@ -33,6 +33,7 @@ sync-deploy.ps1（改源码后同步到 profile，需重启 DSH）；node test-p
 
 <!-- handoff:history:start -->
 - [2026-08-22T19:35:55+08:00] 目标：修复 Token 统计页白屏崩溃并做回归验证；结果：已完成：修复 t 未定义引用，加错误边界，新增前端引用测试，已部署并推送（commit 6f5df43）；下一步：用户重启 DSH web 验收；后续可选：费用卡片+预算条 / 时间范围快捷键 / ECharts 交互图 / 偏好记忆；README 截图更新
+- [2026-09-22T10:54:00+08:00] 目标：优化 Token 统计页（列表长且丑 / 左右分栏乱 / 太紧凑）；结果：已完成：单列全宽布局重构（删 .tkst-split 分栏 + 重复的 tkst-bars 模型横条列表）、工具栏两行化、间距字号圆角全面放大、会话表标题化（sessTitleMap join op=sessions）、三分区表头计数 meta、清死 CSS；14+35 项测试全过；下一步：用户重启 DSH web 验收；后续可选：README demo.png 重截 / 表格行数偏好 / 模型表内嵌占比小条
 <!-- handoff:history:end -->
 <!-- handoff:auto:end -->
 
@@ -50,7 +51,8 @@ sync-deploy.ps1（改源码后同步到 profile，需重启 DSH）；node test-p
 | `d34c78b` UI | 细柱+圆角+网格线+按模型堆叠柱（series.models）+修复设置页横向溢出（响应式 grid、tablewrap、会话名截断） |
 | `488217e` UI | 堆叠柱压密（柱宽85%）、图表加高 230px、近 30 天、鲜亮 8 色板、顶部汇总条、表格 20 行、tooltip 加调用+费用 |
 | `6f5df43` Fix | **修复白屏崩溃**（见历史问题）+ StatsErrorBoundary 错误边界 + test-client-refs.js |
-| 当前 HEAD | `6f5df43` on `main`，与 `origin/main` 同步 |
+| 工作区打磨（提交于本轮） | UI 美术升级：卡片 accent/spark/delta 芯片、分段粒度控件、渐变堆叠柱+总量线、费用环图、模型色贯穿、sticky 表、骨架屏、StatsView page 数组组装 |
+| 本轮（提交于本轮） | UI 布局重构：单列全宽（删左右分栏 tkst-split + 重复模型横条列表 tkst-bars）、工具栏两行化、间距/字号/圆角全面放大、会话表标题化（sessTitleMap）、分区表头计数、清死 CSS |
 
 ### 升级 / 部署方法
 

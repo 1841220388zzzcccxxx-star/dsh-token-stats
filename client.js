@@ -8,64 +8,87 @@ window.__ModuleLoader__.load({
 
 		//#region styles
 		const css = [
-			".tkst-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}",
-			".tkst-card{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px;padding:10px 12px}",
-			".tkst-card .k{font-size:11px;color:var(--dsw-alias-label-secondary)}",
-			".tkst-card .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-primary);margin-top:2px}",
-			".tkst-card .s{font-size:11px;color:var(--dsw-alias-label-secondary);margin-top:2px;display:flex;gap:6px;align-items:center}",
-			".tkst-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}",
-			".tkst-filters select{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 10px;font-size:12px}",
-			".tkst-filters button{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}",
-			".tkst-filters button:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}",
-			".tkst-filters input[type=text]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 10px;font-size:12px;min-width:160px}",
-			".tkst-filters input[type=text]:focus{border-color:var(--dsw-alias-brand-primary);outline:none}",
-			".tkst-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start}",
-			".tkst-grid .tkst-full{grid-column:1 / -1}",
-			".tkst-sec{margin-bottom:16px}",
-			".tkst-sec h4{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}",
-			".tkst-chart{width:100%;height:230px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
-			".tkst-sumline{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--dsw-alias-label-secondary);margin-bottom:10px;font-variant-numeric:tabular-nums}",
-			".tkst-sumline b{color:var(--dsw-alias-label-primary);font-weight:600}",
-			".tkst-chart rect.tkst-bar-r{opacity:.72;transition:opacity .12s}",
+			// single-column vertical flow: no left/right split, no duplicate model bars.
+			// roomy panels (padding 16/18), taller table rows (9px 14px, 13px), bigger gaps (18px page / 12px cards).
+			".tkst-page{display:flex;flex-direction:column;gap:18px}",
+			".tkst-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}",
+			".tkst-card{position:relative;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:14px;padding:14px 16px 14px 18px;overflow:hidden;transition:border-color .15s ease,box-shadow .15s ease}",
+			".tkst-card::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--tkst-accent,var(--dsw-alias-brand-primary));opacity:.9}",
+			".tkst-card:hover{border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 35%,var(--dsw-alias-border-l1));box-shadow:0 1px 0 color-mix(in srgb,var(--dsw-alias-brand-primary) 8%,transparent) inset}",
+			".tkst-card .k{font-size:12px;color:var(--dsw-alias-label-secondary);letter-spacing:.02em}",
+			".tkst-card .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-primary);margin-top:3px;line-height:1.15;letter-spacing:-.02em}",
+			".tkst-card .s{font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:6px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}",
+			".tkst-card .spark{position:absolute;right:8px;bottom:8px;opacity:.55;pointer-events:none}",
+			".tkst-toolbar{display:flex;flex-direction:column;gap:10px}",
+			".tkst-toolbar-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}",
+			".tkst-toolbar .sp{flex:1;min-width:8px}",
+			".tkst-seg{display:inline-flex;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:9px;padding:2px;gap:2px}",
+			".tkst-seg button{background:transparent;color:var(--dsw-alias-label-secondary);border:0;border-radius:7px;padding:6px 14px;font-size:12.5px;cursor:pointer;transition:background .12s,color .12s}",
+			".tkst-seg button:hover{color:var(--dsw-alias-label-primary)}",
+			".tkst-seg button.tkst-seg-on{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 16%,var(--dsw-alias-bg-layer-2));color:var(--dsw-alias-brand-primary);font-weight:600}",
+			".tkst-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}",
+			".tkst-filters select{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:6px 10px;font-size:12.5px}",
+			".tkst-filters button,.tkst-btn{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:pointer;transition:border-color .12s,color .12s,background .12s}",
+			".tkst-filters button:hover,.tkst-btn:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}",
+			".tkst-btn-primary{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 14%,var(--dsw-alias-bg-layer-1));border-color:color-mix(in srgb,var(--dsw-alias-brand-primary) 40%,var(--dsw-alias-border-l1));color:var(--dsw-alias-brand-primary);font-weight:600}",
+			".tkst-btn-primary:hover{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 22%,var(--dsw-alias-bg-layer-1))}",
+			".tkst-filters input[type=text]{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:6px 10px;font-size:12.5px;min-width:200px}",
+			".tkst-filters input[type=text]:focus{border-color:var(--dsw-alias-brand-primary);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--dsw-alias-brand-primary) 18%,transparent)}",
+			".tkst-chips{display:flex;gap:10px;flex-wrap:wrap;align-items:center}",
+			".tkst-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums}",
+			".tkst-chip b{color:var(--dsw-alias-label-primary);font-weight:600}",
+			".tkst-sec{display:flex;flex-direction:column;gap:10px;min-width:0}",
+			".tkst-sec-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}",
+			".tkst-sec-hd h4{margin:0;font-size:13px;font-weight:600;color:var(--dsw-alias-label-secondary);letter-spacing:.02em}",
+			".tkst-sec-hd .hd-meta{font-size:11px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}",
+			".tkst-panel{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:14px;padding:16px 18px}",
+			".tkst-chart{width:100%;height:240px;display:block}",
+			".tkst-chart-wrap{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:14px;padding:12px 10px 8px}",
+			".tkst-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-bottom:8px;padding:0 6px}",
+			".tkst-legend .tkst-lg{display:inline-flex;align-items:center;gap:5px}",
+			".tkst-legend .tkst-lg i{display:inline-block;width:9px;height:9px;border-radius:3px;box-shadow:0 0 0 1px color-mix(in srgb,#fff 12%,transparent)}",
+			".tkst-chart rect.tkst-bar-r{opacity:.82;transition:opacity .12s ease}",
 			".tkst-chart rect.tkst-bar-r:hover{opacity:1}",
-			".tkst-legend{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--dsw-alias-label-secondary);margin-bottom:6px}",
-			".tkst-legend .tkst-lg{display:inline-flex;align-items:center;gap:4px}",
-			".tkst-legend .tkst-lg i{display:inline-block;width:10px;height:10px;border-radius:3px}",
-			".tkst-bars{display:flex;flex-direction:column;gap:6px}",
-			".tkst-bar{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:12px;cursor:pointer;padding:2px 4px;border-radius:6px}",
-			".tkst-bar:hover{background:var(--dsw-alias-bg-layer-2)}",
-			".tkst-bar .n{color:var(--dsw-alias-label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-			".tkst-bar .track{background:var(--dsw-alias-bg-layer-2);border-radius:5px;height:14px;overflow:hidden}",
-			".tkst-bar .fill{height:100%;background:var(--dsw-alias-brand-primary);border-radius:5px;min-width:2px}",
-			".tkst-bar .v2{color:var(--dsw-alias-label-secondary);text-align:right;font-variant-numeric:tabular-nums}",
-			".tkst-tablewrap{overflow-x:auto;width:100%}",
-			".tkst-table{width:100%;border-collapse:collapse;font-size:12px}",
-			".tkst-table th{text-align:left;color:var(--dsw-alias-label-secondary);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--dsw-alias-border-l1);white-space:nowrap;cursor:pointer;user-select:none}",
+			".tkst-chart .tkst-total-line{fill:none;stroke:color-mix(in srgb,var(--dsw-alias-label-primary) 55%,transparent);stroke-width:1.25;stroke-linejoin:round;stroke-linecap:round;pointer-events:none}",
+			".tkst-chart .tkst-total-dot{fill:var(--dsw-alias-label-primary);opacity:.7;pointer-events:none}",
+			".tkst-donut-row{display:flex;gap:20px;align-items:center;flex-wrap:wrap}",
+			".tkst-donut-legend{display:flex;flex-direction:column;gap:10px;min-width:0;flex:1}",
+			".tkst-donut-legend .row{display:grid;grid-template-columns:11px 1fr auto;gap:10px;align-items:center;font-size:13px;min-width:0}",
+			".tkst-donut-legend .row i{width:11px;height:11px;border-radius:3px}",
+			".tkst-donut-legend .row .n{color:var(--dsw-alias-label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+			".tkst-donut-legend .row .v{color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}",
+			".tkst-donut{flex-shrink:0}",
+			".tkst-tablewrap{overflow:auto;width:100%;max-height:480px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;background:var(--dsw-alias-bg-layer-1)}",
+			".tkst-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}",
+			".tkst-table th{position:sticky;top:0;z-index:2;text-align:left;color:var(--dsw-alias-label-secondary);font-weight:600;padding:10px 14px;background:var(--dsw-alias-bg-layer-2);border-bottom:1px solid var(--dsw-alias-border-l1);white-space:nowrap;cursor:pointer;user-select:none}",
 			".tkst-table th:hover{color:var(--dsw-alias-label-primary)}",
-			".tkst-table th.tkst-sort-asc::after{content:' ▲';font-size:9px}",
-			".tkst-table th.tkst-sort-desc::after{content:' ▼';font-size:9px}",
-			".tkst-table td{padding:6px 8px;color:var(--dsw-alias-label-primary);border-bottom:1px solid var(--dsw-alias-border-l1);font-variant-numeric:tabular-nums;white-space:nowrap}",
-			".tkst-table th:first-child,.tkst-table td:first-child{max-width:260px;overflow:hidden;text-overflow:ellipsis}",
-			".tkst-table tr:hover td{background:var(--dsw-alias-bg-layer-1)}",
+			".tkst-table th.tkst-sort-asc::after{content:' ▲';font-size:9px;opacity:.8}",
+			".tkst-table th.tkst-sort-desc::after{content:' ▼';font-size:9px;opacity:.8}",
+			".tkst-table td{padding:9px 14px;color:var(--dsw-alias-label-primary);border-bottom:1px solid color-mix(in srgb,var(--dsw-alias-border-l1) 70%,transparent);font-variant-numeric:tabular-nums;white-space:nowrap;background:var(--dsw-alias-bg-layer-1)}",
+			".tkst-table tbody tr:hover td{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 6%,var(--dsw-alias-bg-layer-1))}",
 			".tkst-table tr.tkst-row-click{cursor:pointer}",
-			".tkst-table tr.tkst-sub td{background:var(--dsw-alias-bg-layer-2);padding-left:24px;border-bottom:1px solid var(--dsw-alias-border-l1)}",
-			".tkst-delta{font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}",
-			".tkst-delta.up{color:var(--dsw-alias-state-error-primary)}",
-			".tkst-delta.down{color:var(--dsw-alias-state-success-primary)}",
-			".tkst-delta.flat{color:var(--dsw-alias-label-secondary)}",
-			".tkst-empty{color:var(--dsw-alias-label-secondary);font-size:12px;padding:18px;text-align:center}",
-			".tkst-rate{font-size:11px;color:var(--dsw-alias-label-secondary);margin-left:auto;padding-right:4px}",
-			".tkst-exportbox{margin-top:10px;padding:10px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:8px}",
-			".tkst-exportbox textarea{width:100%;height:120px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:6px;font-size:11px;padding:8px;font-family:ui-monospace,Consolas,monospace}",
-			".tkst-err{margin:8px 0;padding:8px 10px;background:var(--dsw-alias-state-error-primary);color:#fff;border-radius:8px;font-size:12px;white-space:pre-wrap}",
-			".tkst-loading{display:flex;align-items:center;gap:8px;color:var(--dsw-alias-label-secondary);font-size:12px;padding:16px;justify-content:center}",
+			".tkst-table tr.tkst-row-click td:first-child{box-shadow:inset 2px 0 0 transparent;transition:box-shadow .12s}",
+			".tkst-table tr.tkst-row-click:hover td:first-child{box-shadow:inset 2px 0 0 var(--dsw-alias-brand-primary)}",
+			".tkst-table tr.tkst-sub td{background:var(--dsw-alias-bg-layer-2);padding:0;border-bottom:1px solid var(--dsw-alias-border-l1)}",
+			".tkst-table .tkst-mdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}",
+			".tkst-delta{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.45}",
+			".tkst-delta.up{color:var(--dsw-alias-state-error-primary);background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 14%,transparent)}",
+			".tkst-delta.down{color:var(--dsw-alias-state-success-primary);background:color-mix(in srgb,var(--dsw-alias-state-success-primary) 14%,transparent)}",
+			".tkst-delta.flat{color:var(--dsw-alias-label-secondary);background:var(--dsw-alias-bg-layer-2)}",
+			".tkst-empty{color:var(--dsw-alias-label-secondary);font-size:12px;padding:24px;text-align:center}",
+			".tkst-exportbox{margin-top:4px;padding:10px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:10px}",
+			".tkst-exportbox textarea{width:100%;height:140px;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:6px;font-size:11px;padding:8px;font-family:ui-monospace,Consolas,monospace}",
+			".tkst-err{margin:0;padding:8px 10px;background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 18%,var(--dsw-alias-bg-layer-1));color:var(--dsw-alias-state-error-primary);border:1px solid color-mix(in srgb,var(--dsw-alias-state-error-primary) 35%,transparent);border-radius:8px;font-size:12px;white-space:pre-wrap}",
+			".tkst-loading{display:flex;align-items:center;gap:8px;color:var(--dsw-alias-label-secondary);font-size:12px;padding:20px;justify-content:center}",
 			".tkst-spin{width:14px;height:14px;border:2px solid var(--dsw-alias-border-l1);border-top-color:var(--dsw-alias-brand-primary);border-radius:50%;animation:tkst-rot .8s linear infinite}",
 			"@keyframes tkst-rot{to{transform:rotate(360deg)}}",
-			".tkst-meta{font-size:11px;color:var(--dsw-alias-label-secondary);margin-left:auto;padding-right:4px;white-space:nowrap}",
-			".tkst-btn-refresh{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;padding:5px 12px;font-size:12px;cursor:pointer}",
-			".tkst-btn-refresh:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}",
+			".tkst-skel{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px}",
+			".tkst-skel .sk{height:88px;border-radius:14px;background:linear-gradient(90deg,var(--dsw-alias-bg-layer-1) 25%,var(--dsw-alias-bg-layer-2) 50%,var(--dsw-alias-bg-layer-1) 75%);background-size:200% 100%;animation:tkst-shimmer 1.2s ease-in-out infinite;border:1px solid var(--dsw-alias-border-l1)}",
+			"@keyframes tkst-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}",
+			"@media (prefers-reduced-motion:reduce){.tkst-spin,.tkst-skel .sk{animation:none}.tkst-card,.tkst-filters button{transition:none}}",
+			".tkst-meta{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;font-variant-numeric:tabular-nums}",
 			".tkst-sess-input{position:relative}",
-			".tkst-sess-list{position:absolute;top:calc(100% + 2px);left:0;z-index:50;min-width:220px;max-height:220px;overflow:auto;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.2)}",
+			".tkst-sess-list{position:absolute;top:calc(100% + 2px);left:0;z-index:50;min-width:220px;max-height:220px;overflow:auto;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.28)}",
 			".tkst-sess-list div{padding:6px 10px;font-size:12px;color:var(--dsw-alias-label-primary);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
 			".tkst-sess-list div:hover,.tkst-sess-list div.tkst-sess-sel{background:var(--dsw-alias-bg-layer-2)}",
 			".tkst-sess-empty{padding:8px 10px;font-size:12px;color:var(--dsw-alias-label-secondary)}"
@@ -98,7 +121,8 @@ window.__ModuleLoader__.load({
 				estimated: "含估算", usdRate: "汇率", copied: "导出内容已生成（浏览器限制，请手动复制下方内容）",
 				refresh: "刷新", loading: "加载中…", updating: "刷新中…", updatedAt: "最后更新",
 				vsPrev: "较上期", expand: "展开", collapse: "收起", searchSess: "搜索会话…",
-				noMatch: "无匹配会话", allSess: "全部会话", delta: "环比"
+				noMatch: "无匹配会话", allSess: "全部会话", delta: "环比",
+				costShare: "费用构成", session: "会话", topModels: "Top 模型"
 			},
 			en: {
 				title: "📊 Token Stats", today: "Today", week: "Week", month: "Month", total: "Total",
@@ -110,7 +134,8 @@ window.__ModuleLoader__.load({
 				estimated: "incl. estimated", usdRate: "Rate", copied: "Export content generated (browser limits, copy manually below)",
 				refresh: "Refresh", loading: "Loading…", updating: "Refreshing…", updatedAt: "Updated",
 				vsPrev: "vs prev", expand: "Expand", collapse: "Collapse", searchSess: "Search sessions…",
-				noMatch: "No matching session", allSess: "All sessions", delta: "Change"
+				noMatch: "No matching session", allSess: "All sessions", delta: "Change",
+				costShare: "Cost share", session: "Session", topModels: "Top models"
 			}
 		};
 		const T = () => (isZh() ? DICT.zh : DICT.en);
@@ -186,8 +211,90 @@ window.__ModuleLoader__.load({
 			} catch (e) { onFallback(content); }
 		};
 
-		// ---------- trend chart: slim dense stacked bars, gridlines, legend ----------
+		// model identity color: stable across chart / bars / tables / donut
 		const PALETTE = ["#8b5cf6", "#06b6d4", "#f59e0b", "#ec4899", "#22c55e", "#ef4444", "#6366f1", "#14b8a6"];
+		const colorOfName = (name, names) => {
+			if (!name) return "var(--dsw-alias-brand-primary)";
+			const i = (names || []).indexOf(name);
+			return PALETTE[(i < 0 ? 0 : i) % PALETTE.length];
+		};
+		const modelNamesOf = (models) => {
+			const grand = new Map();
+			for (const list of models) {
+				for (const m of list) grand.set(m.model, (grand.get(m.model) || 0) + m.total);
+			}
+			return [...grand.keys()];
+		};
+
+		// ---------- mini sparkline (cards) ----------
+		function MiniSpark({ values, color, w, h }) {
+			w = w || 64; h = h || 22;
+			if (!values || values.length < 2) return null;
+			const max = Math.max.apply(null, values.concat([1]));
+			const min = 0;
+			const n = values.length;
+			const pts = values.map((v, i) => {
+				const x = (i / (n - 1)) * (w - 2) + 1;
+				const y = h - 2 - ((v - min) / (max - min || 1)) * (h - 4);
+				return x.toFixed(1) + "," + y.toFixed(1);
+			});
+			return react.createElement("svg", { className: "spark", width: w, height: h, viewBox: "0 0 " + w + " " + h, "aria-hidden": "true" },
+				react.createElement("polyline", {
+					points: pts.join(" "),
+					fill: "none",
+					stroke: color || "var(--dsw-alias-brand-primary)",
+					"stroke-width": "1.5",
+					"stroke-linejoin": "round",
+					"stroke-linecap": "round"
+				})
+			);
+		}
+
+		// ---------- cost share donut ----------
+		function CostDonut({ models, colorOf }) {
+			const rows = (models || []).filter((m) => (m.usd || 0) > 0).slice(0, 6);
+			const sum = rows.reduce((a, m) => a + (m.usd || 0), 0);
+			if (!sum) return react.createElement("div", { className: "tkst-empty" }, T().empty);
+			const R = 36, C = 2 * Math.PI * R;
+			let acc = 0;
+			const arcs = rows.map((m, i) => {
+				const frac = (m.usd || 0) / sum;
+				const len = frac * C;
+				const el = react.createElement("circle", {
+					key: m.model,
+					cx: 50, cy: 50, r: R,
+					fill: "none",
+					stroke: colorOf(m.model),
+					"stroke-width": 12,
+					"stroke-dasharray": len.toFixed(2) + " " + (C - len).toFixed(2),
+					"stroke-dashoffset": (-acc * C).toFixed(2),
+					transform: "rotate(-90 50 50)",
+					opacity: 0.92
+				});
+				acc += frac;
+				return el;
+			});
+			return react.createElement("div", { className: "tkst-donut-row" },
+				react.createElement("svg", { className: "tkst-donut", width: 100, height: 100, viewBox: "0 0 100 100" },
+					arcs,
+					react.createElement("text", { x: 50, y: 48, "text-anchor": "middle", "font-size": 11, fill: "var(--dsw-alias-label-secondary)" }, "USD"),
+					react.createElement("text", { x: 50, y: 62, "text-anchor": "middle", "font-size": 13, "font-weight": 700, fill: "var(--dsw-alias-label-primary)" },
+						sum < 0.01 ? sum.toFixed(4) : sum.toFixed(2))
+				),
+				react.createElement("div", { className: "tkst-donut-legend" },
+					rows.map((m) => {
+						const pct = ((m.usd || 0) / sum * 100).toFixed(1) + "%";
+						return react.createElement("div", { className: "row", key: m.model },
+							react.createElement("i", { style: { background: colorOf(m.model) } }),
+							react.createElement("span", { className: "n", title: m.model }, m.model),
+							react.createElement("span", { className: "v" }, fmtMoney(m.usd) + " · " + pct)
+						);
+					})
+				)
+			);
+		}
+
+		// ---------- trend chart: slim dense stacked bars, gridlines, legend, total line ----------
 		function TrendChart({ series }) {
 			const W = 820, H = 230, P = 24;
 			if (!series || series.length === 0) return react.createElement("div", { className: "tkst-empty" }, T().empty);
@@ -200,9 +307,11 @@ window.__ModuleLoader__.load({
 			const grand = new Map();
 			for (const ms of pointModels) for (const m of ms) grand.set(m.model, (grand.get(m.model) || 0) + m.total);
 			const modelNames = [...grand.keys()];
+			// keep self-contained (pseudo-exec unit test evals this function alone)
 			const colorOf = (name) => {
 				if (!name) return "var(--dsw-alias-brand-primary)";
-				return PALETTE[modelNames.indexOf(name) % PALETTE.length];
+				const i = modelNames.indexOf(name);
+				return PALETTE[(i < 0 ? 0 : i) % PALETTE.length];
 			};
 			const n = series.length;
 			const slot = (W - 2 * P) / n;
@@ -212,6 +321,19 @@ window.__ModuleLoader__.load({
 				const y = H - P - f * (H - 2 * P);
 				return react.createElement("line", { key: "g" + i, x1: P, x2: W - P, y1: y.toFixed(1), y2: y.toFixed(1), stroke: "var(--dsw-alias-border-l1)", "stroke-dasharray": "3,4", "stroke-width": 1 });
 			});
+			// defs: vertical gradients per palette index
+			const defs = react.createElement("defs", null,
+				PALETTE.map((c, i) =>
+					react.createElement("linearGradient", { key: "gr" + i, id: "tkst-grad-" + i, x1: "0", y1: "0", x2: "0", y2: "1" },
+						react.createElement("stop", { offset: "0%", "stop-color": c, "stop-opacity": "0.95" }),
+						react.createElement("stop", { offset: "100%", "stop-color": c, "stop-opacity": "0.35" })
+					)
+				),
+				react.createElement("linearGradient", { key: "gr-def", id: "tkst-grad-def", x1: "0", y1: "0", x2: "0", y2: "1" },
+					react.createElement("stop", { offset: "0%", "stop-color": "#8b5cf6", "stop-opacity": "0.95" }),
+					react.createElement("stop", { offset: "100%", "stop-color": "#8b5cf6", "stop-opacity": "0.35" })
+				)
+			);
 			// stacked slim bars; tooltip carries calls + cost per point
 			const bars = [];
 			for (let i = 0; i < n; i++) {
@@ -225,14 +347,24 @@ window.__ModuleLoader__.load({
 					const lines = [series[i].label + " · " + fmt(totals[i]) + " " + T().tokens];
 					lines.push(T().calls + " " + pt.calls + " · " + fmtMoney(pt.usd) + " / " + fmtCny(pt.cny));
 					if (ms.length > 1 || ms[0].model) for (const m of ms) lines.push("· " + m.model + ": " + fmt(m.total));
+					const gi = modelNames.indexOf(ms[j].model);
+					const fill = !ms[j].model ? "url(#tkst-grad-def)" : "url(#tkst-grad-" + ((gi < 0 ? 0 : gi) % PALETTE.length) + ")";
 					bars.push(react.createElement("rect", {
 						key: i + "-" + j, className: "tkst-bar-r",
 						x: (P + i * slot).toFixed(2), y: y.toFixed(1),
 						width: bw.toFixed(2), height: h.toFixed(1),
-						fill: colorOf(ms[j].model), rx: j === ms.length - 1 ? 1.5 : 0
+						fill: fill, rx: j === ms.length - 1 ? 1.5 : 0
 					}, react.createElement("title", null, lines.join("\n"))));
 				}
 			}
+			// total trend polyline over the stacks
+			const linePts = series.map((s, i) => {
+				const x = P + i * slot + bw / 2;
+				const y = H - P - (totals[i] / max) * (H - 2 * P);
+				return x.toFixed(1) + "," + y.toFixed(1);
+			}).join(" ");
+			const lastX = P + (n - 1) * slot + bw / 2;
+			const lastY = H - P - (totals[n - 1] / max) * (H - 2 * P);
 			const tickIdx = n <= 4 ? [0, n - 1]
 				: [0, Math.round((n - 1) / 4), Math.round((n - 1) / 2), Math.round((3 * (n - 1)) / 4), n - 1];
 			const showLegend = modelNames.filter(Boolean).length > 1;
@@ -243,8 +375,11 @@ window.__ModuleLoader__.load({
 							react.createElement("i", { style: { background: colorOf(m) } }), m))
 				) : null,
 				react.createElement("svg", { viewBox: "0 0 " + W + " " + H, className: "tkst-chart", preserveAspectRatio: "none" },
+					defs,
 					gridLines,
 					bars,
+					react.createElement("polyline", { className: "tkst-total-line", points: linePts }),
+					n > 0 ? react.createElement("circle", { className: "tkst-total-dot", cx: lastX.toFixed(1), cy: lastY.toFixed(1), r: 2.5 }) : null,
 					react.createElement("text", { x: P, y: 13, "font-size": 10, fill: "var(--dsw-alias-label-secondary)" }, "≤ " + fmt(max)),
 					tickIdx.map((i, k) => {
 						if (i < 0 || i >= n) return null;
@@ -413,17 +548,14 @@ window.__ModuleLoader__.load({
 				} catch (e) { setErr("导出错误: " + String(e && e.message ? e.message : e)); }
 			};
 
-			const cards = summary ? [
-				[t.today, fmt(summary.today.total), t.calls + " " + summary.today.calls, summary.prev ? pctDelta(summary.today.total, summary.prev.yesterday.total) : null],
-				[t.week, fmt(summary.week.total), t.calls + " " + summary.week.calls, summary.prev ? pctDelta(summary.week.total, summary.prev.lastWeek.total) : null],
-				[t.month, fmt(summary.month.total), t.calls + " " + summary.month.calls, summary.prev ? pctDelta(summary.month.total, summary.prev.lastMonth.total) : null],
-				[t.total, fmt(summary.total.total), t.calls + " " + summary.total.calls, null]
-			] : null;
-
 			const modelOptions = (q0 && q0.models ? q0.models : q && q.models ? q.models : []).map((m) => m.model);
 			const uniqueModels = modelOptions.filter((v, i, a) => a.indexOf(v) === i);
 			const modelRowsAll = q && q.models ? q.models : [];
 			const sessionRowsAll = q && q.sessions ? q.sessions : [];
+			// shared model identity list (chart + bars + donut + tables)
+			const identityModels = (q0 && q0.models ? q0.models : modelRowsAll).map((m) => ({ model: m.model, total: m.total, usd: m.usd || 0 }));
+			const identityNames = identityModels.map((m) => m.model);
+			const colorOf = (name) => colorOfName(name, identityNames);
 			// precompute a sortable period-over-period ratio per model row
 			const modelRowsWithDelta = modelRowsAll.map((m) => ({
 				...m,
@@ -434,15 +566,17 @@ window.__ModuleLoader__.load({
 			const series = q && q.series ? q.series : [];
 			// day granularity: dense view of the most recent 30 points
 			const trendSeries = gran === "day" && series.length > 30 ? series.slice(-30) : series;
+			// sparkline source: unfiltered daily series preferred
+			const sparkSeries = (q0 && q0.series ? q0.series : series).slice(-14).map((s) => s.total || 0);
 			const isLoading = loading && !summary && !q;
 
 			// session search: fuzzy match on id/title
 			const sessFiltered = sessQuery
 				? sessions.filter((s) => (s.title || s.id).toLowerCase().indexOf(sessQuery.toLowerCase()) !== -1)
 				: sessions;
-			const sessSelTitle = session
-				? (sessions.find((s) => s.id === session) || { title: session }).title
-				: "";
+			// sessionId -> display title (join with op=sessions titles so tables show
+			// readable session names instead of raw UUIDs)
+			const sessTitleMap = new Map(sessions.map((s) => [s.id, s.title || s.id]));
 			// drill-down rows for the expanded model / session
 			const drillModelSessions = drill.model && drillData.model ? drillData.model : null;
 			const drillSessionSeries = drill.session && drillData.session ? drillData.session : null;
@@ -450,6 +584,14 @@ window.__ModuleLoader__.load({
 			// summary strip under the cards: grand totals incl. cost (from unfiltered model aggregate)
 			const sumUsd = q0 && q0.models ? q0.models.reduce((a, m) => a + (m.usd || 0), 0) : null;
 			const sumCny = q0 && q0.models ? q0.models.reduce((a, m) => a + (m.cny || 0), 0) : null;
+
+			const cardAccents = ["#06b6d4", "#8b5cf6", "#f59e0b", "#22c55e"];
+			const cards = summary ? [
+				[t.today, fmt(summary.today.total), t.calls + " " + summary.today.calls, summary.prev ? pctDelta(summary.today.total, summary.prev.yesterday.total) : null, cardAccents[0]],
+				[t.week, fmt(summary.week.total), t.calls + " " + summary.week.calls, summary.prev ? pctDelta(summary.week.total, summary.prev.lastWeek.total) : null, cardAccents[1]],
+				[t.month, fmt(summary.month.total), t.calls + " " + summary.month.calls, summary.prev ? pctDelta(summary.month.total, summary.prev.lastMonth.total) : null, cardAccents[2]],
+				[t.total, fmt(summary.total.total), t.calls + " " + summary.total.calls, null, cardAccents[3]]
+			] : null;
 
 			const th = (label, sort, state, setState) => {
 				const cls = state.key === sort ? (state.dir === 1 ? "tkst-sort-asc" : "tkst-sort-desc") : "";
@@ -464,156 +606,247 @@ window.__ModuleLoader__.load({
 				: null;
 			const shortName = (txt) => (txt && String(txt).length > 30 ? String(txt).slice(0, 29) + "…" : txt);
 			const tableWrap = (el) => react.createElement("div", { className: "tkst-tablewrap" }, el);
+			const modelDot = (name) => react.createElement("span", { className: "tkst-mdot", style: { background: colorOf(name) } });
 
-			return react.createElement("div", null,
-				err ? react.createElement("div", { className: "tkst-err" }, err) : null,
-				isLoading
-					? react.createElement("div", { className: "tkst-loading" },
+			// assemble page children in a flat list (avoids deep ternary nesting)
+			const page = [];
+			if (err) page.push(react.createElement("div", { key: "err", className: "tkst-err" }, err));
+			if (isLoading) {
+				page.push(react.createElement("div", { key: "load" },
+					react.createElement("div", { className: "tkst-skel" },
+						[0, 1, 2, 3].map((i) => react.createElement("div", { className: "sk", key: i }))),
+					react.createElement("div", { className: "tkst-loading" },
 						react.createElement("span", { className: "tkst-spin" }),
 						react.createElement("span", null, t.loading))
-					: react.createElement("div", null,
-				react.createElement("div", { className: "tkst-cards" },
-					cards ? cards.map((c, i) =>
-						react.createElement("div", { className: "tkst-card", key: i },
+				));
+			} else {
+				page.push(react.createElement("div", { key: "cards", className: "tkst-cards" },
+					cards
+						? cards.map((c, i) => react.createElement("div", {
+							className: "tkst-card", key: i,
+							style: { "--tkst-accent": c[4] }
+						},
 							react.createElement("div", { className: "k" }, c[0]),
 							react.createElement("div", { className: "v" }, c[1]),
 							react.createElement("div", { className: "s" },
 								react.createElement("span", null, c[2]),
 								deltaSpan(c[3])
-							)
+							),
+							sparkSeries.length > 1 && i < 3
+								? react.createElement(MiniSpark, { values: sparkSeries, color: c[4] })
+								: null
 						))
-					: [0, 1, 2, 3].map((i) =>
-						react.createElement("div", { className: "tkst-card", key: i },
+						: [0, 1, 2, 3].map((i) => react.createElement("div", {
+							className: "tkst-card", key: i,
+							style: { "--tkst-accent": cardAccents[i] }
+						},
 							react.createElement("div", { className: "k" }, "—"),
 							react.createElement("div", { className: "v" }, "—"),
-							react.createElement("div", { className: "s" }, "")))),
-				react.createElement("div", { className: "tkst-sumline" },
-					summary ? [
-						react.createElement("span", { key: "tk" }, "Σ " + t.tokens + " "),
-						react.createElement("b", { key: "tkv" }, fmt(summary.total.total)),
-						react.createElement("span", { key: "usd" }, t.costUsd + " "),
-						react.createElement("b", { key: "usdv" }, fmtMoney(sumUsd)),
-						react.createElement("span", { key: "cny" }, t.costCny + " "),
-						react.createElement("b", { key: "cnyv" }, fmtCny(sumCny)),
-						react.createElement("span", { key: "cl" }, t.calls + " "),
-						react.createElement("b", { key: "clv" }, String(summary.total.calls))
-					] : null),
-				react.createElement("div", { className: "tkst-filters" },
-					react.createElement("span", null, t.granularity),
-					react.createElement("select", { value: gran, onChange: (e) => setGran(e.target.value) },
-						react.createElement("option", { value: "day" }, t.day),
-						react.createElement("option", { value: "week" }, t.weekG),
-						react.createElement("option", { value: "month" }, t.monthG)
+							react.createElement("div", { className: "s" }, "")
+						))
+				));
+
+				// toolbar: two rows — controls (granularity/filters/actions) on top,
+				// summary chips + updated time below. No more one-line cramming.
+				page.push(react.createElement("div", { key: "toolbar", className: "tkst-toolbar" },
+					react.createElement("div", { className: "tkst-toolbar-row" },
+						react.createElement("div", { className: "tkst-seg" },
+							["day", "week", "month"].map((g) =>
+								react.createElement("button", {
+									key: g,
+									className: gran === g ? "tkst-seg-on" : "",
+									onClick: () => setGran(g)
+								}, g === "day" ? t.day : g === "week" ? t.weekG : t.monthG))
+						),
+						react.createElement("div", { className: "tkst-filters" },
+							react.createElement("select", { value: model, onChange: (e) => setModel(e.target.value) },
+								react.createElement("option", { value: "" }, t.allModels),
+								uniqueModels.map((m) => react.createElement("option", { key: m, value: m }, m))
+							),
+							react.createElement("div", { className: "tkst-sess-input" },
+								react.createElement("input", {
+									type: "text", placeholder: t.searchSess,
+									value: sessQuery,
+									onFocus: () => setSessOpen(true),
+									onBlur: () => setTimeout(() => setSessOpen(false), 150),
+									onChange: (e) => { setSessQuery(e.target.value); setSessOpen(true); }
+								}),
+								sessOpen
+									? react.createElement("div", { className: "tkst-sess-list" },
+										sessFiltered.length === 0
+											? react.createElement("div", { className: "tkst-sess-empty" }, t.noMatch)
+											: sessFiltered.map((s) => {
+												const sel = s.id === session;
+												return react.createElement("div", {
+													key: s.id,
+													className: sel ? "tkst-sess-sel" : "",
+													onMouseDown: () => {
+														setSession(sel ? "" : s.id);
+														setSessQuery(sel ? "" : s.title || s.id);
+														setSessOpen(false);
+													}
+												}, (s.title || s.id) + (sel ? " ✓" : ""));
+											})
+									)
+									: null
+							),
+							session
+								? react.createElement("button", { onClick: () => { setSession(""); setSessQuery(""); } }, "✕ " + t.allSess)
+								: null
+						),
+						react.createElement("span", { className: "sp" }),
+						react.createElement("div", { className: "tkst-filters" },
+							react.createElement("button", {
+								className: "tkst-btn-primary",
+								onClick: () => setRefreshTick((x) => x + 1),
+								title: t.refresh
+							}, updating ? t.updating : "↻ " + t.refresh),
+							react.createElement("button", { onClick: () => doExport("csv") }, t.exportCsv),
+							react.createElement("button", { onClick: () => doExport("json") }, t.exportJson)
+						)
 					),
-					react.createElement("select", { value: model, onChange: (e) => setModel(e.target.value) },
-						react.createElement("option", { value: "" }, t.allModels),
-						uniqueModels.map((m) => react.createElement("option", { key: m, value: m }, m))
-					),
-					react.createElement("div", { className: "tkst-sess-input" },
-						react.createElement("input", {
-							type: "text", placeholder: t.searchSess,
-							value: sessQuery,
-							onFocus: () => setSessOpen(true),
-							onBlur: () => setTimeout(() => setSessOpen(false), 150),
-							onChange: (e) => { setSessQuery(e.target.value); setSessOpen(true); }
-						}),
-						sessOpen ? react.createElement("div", { className: "tkst-sess-list" },
-							sessFiltered.length === 0
-								? react.createElement("div", { className: "tkst-sess-empty" }, t.noMatch)
-								: sessFiltered.map((s) => {
-									const sel = s.id === session;
-									return react.createElement("div", { key: s.id, className: sel ? "tkst-sess-sel" : "", onMouseDown: () => {
-										setSession(sel ? "" : s.id);
-										setSessQuery(sel ? "" : s.title || s.id);
-										setSessOpen(false);
-									}}, (s.title || s.id) + (sel ? " ✓" : ""));
-								})
-						) : null
-					),
-					session ? react.createElement("button", { onClick: () => { setSession(""); setSessQuery(""); } }, "✕ " + t.allSess) : null,
-					react.createElement("button", { onClick: () => setRefreshTick((x) => x + 1), title: t.refresh },
-						updating ? t.updating : "↻ " + t.refresh),
-					react.createElement("button", { onClick: () => doExport("csv") }, t.exportCsv),
-					react.createElement("button", { onClick: () => doExport("json") }, t.exportJson),
-					react.createElement("span", { className: "tkst-rate" },
-						meta ? t.usdRate + " 1 USD = " + meta.usdCny + " CNY · " + t.estimated : ""),
-					updatedAt ? react.createElement("span", { className: "tkst-meta" },
-						t.updatedAt + " " + fmtTime(updatedAt)) : null
-				),
-				react.createElement("div", { className: "tkst-grid" },
-				react.createElement("div", { className: "tkst-full" },
-					react.createElement("div", { className: "tkst-sec" },
+					react.createElement("div", { className: "tkst-toolbar-row" },
+						react.createElement("div", { className: "tkst-chips" },
+							summary
+								? react.createElement("span", { className: "tkst-chip" },
+									"Σ ", react.createElement("b", null, fmt(summary.total.total)), " ", t.tokens)
+								: null,
+							sumUsd != null
+								? react.createElement("span", { className: "tkst-chip" },
+									t.costUsd, " ", react.createElement("b", null, fmtMoney(sumUsd)))
+								: null,
+							sumCny != null
+								? react.createElement("span", { className: "tkst-chip" },
+									t.costCny, " ", react.createElement("b", null, fmtCny(sumCny)))
+								: null,
+							summary
+								? react.createElement("span", { className: "tkst-chip" },
+									t.calls, " ", react.createElement("b", null, String(summary.total.calls)))
+								: null,
+							meta
+								? react.createElement("span", { className: "tkst-chip" },
+									t.usdRate, " 1 USD = ", react.createElement("b", null, String(meta.usdCny)), " CNY")
+								: null,
+							updatedAt
+								? react.createElement("span", { className: "tkst-meta" }, t.updatedAt + " " + fmtTime(updatedAt))
+								: null
+						)
+					)
+				));
+
+				page.push(react.createElement("div", { key: "trend", className: "tkst-sec" },
+					react.createElement("div", { className: "tkst-sec-hd" },
 						react.createElement("h4", null, t.trend),
+						react.createElement("span", { className: "hd-meta" },
+							gran === "day" && trendSeries.length
+								? trendSeries[0].label + " → " + trendSeries[trendSeries.length - 1].label
+								: "")
+					),
+					react.createElement("div", { className: "tkst-chart-wrap" },
 						series.length === 0 && !q
 							? react.createElement("div", { className: "tkst-empty" }, t.loading)
 							: react.createElement(TrendChart, { series: trendSeries })
+					)
+				));
+
+				// 费用构成: full-width panel (donut left, legend right) —
+				// replaces the cramped left column + duplicate model bars list.
+				page.push(react.createElement("div", { key: "cost", className: "tkst-sec" },
+					react.createElement("div", { className: "tkst-sec-hd" },
+						react.createElement("h4", null, t.costShare),
+						modelRowsAll.length
+							? react.createElement("span", { className: "hd-meta" }, modelRowsAll.length + " " + t.model)
+							: null
+					),
+					react.createElement("div", { className: "tkst-panel" },
+						react.createElement(CostDonut, {
+							models: (q0 && q0.models ? q0.models : modelRowsAll).map((m) => ({
+								model: m.model, usd: m.usd, total: m.total
+							})),
+							colorOf
+						})
+					)
+				));
+
+				const modelTable = tableWrap(react.createElement("table", { className: "tkst-table" },
+					react.createElement("thead", null, react.createElement("tr", null,
+						th(t.model, "model", sortModel, setSortModel),
+						th(t.delta, "deltaRatio", sortModel, setSortModel),
+						th(t.calls, "calls", sortModel, setSortModel),
+						th(t.tokens, "total", sortModel, setSortModel),
+						th(t.costUsd, "usd", sortModel, setSortModel),
+						th(t.costCny, "cny", sortModel, setSortModel)
 					)),
-				react.createElement("div", { className: "tkst-sec" },
-					react.createElement("h4", null, t.byModel),
-					modelRows.length === 0
-						? react.createElement("div", { className: "tkst-empty" }, t.empty)
-						: react.createElement("div", { className: "tkst-bars" }, modelRows.map((m) => {
-							const max = modelRows[0].total || 1;
-							return react.createElement("div", { className: "tkst-bar", key: m.model, onClick: () => toggleModelDrill(m.model), title: t.expand + ": " + m.model },
-								react.createElement("span", { className: "n", title: m.model }, (drill.model === m.model ? "▾ " : "▸ ") + m.model),
-								react.createElement("div", { className: "track" },
-									react.createElement("div", { className: "fill", style: { width: Math.max(2, (m.total / max) * 100) + "%" } })),
-								react.createElement("span", { className: "v2" }, fmt(m.total))
-							);
-						}))
-				),
-				react.createElement("div", { className: "tkst-sec" },
-					react.createElement("h4", null, t.byModel + " / " + t.bySession),
-					tableWrap(react.createElement("table", { className: "tkst-table" },
-						react.createElement("thead", null, react.createElement("tr", null,
-							th(t.model, "model", sortModel, setSortModel),
-							th(t.delta, "deltaRatio", sortModel, setSortModel),
-							th(t.calls, "calls", sortModel, setSortModel),
-							th(t.tokens, "total", sortModel, setSortModel),
-							th(t.costUsd, "usd", sortModel, setSortModel),
-							th(t.costCny, "cny", sortModel, setSortModel)
-						)),
-						react.createElement("tbody", null,
-							modelRows.map((m) => {
-								const dd = m.prevTotal > 0 ? pctDelta(m.total, m.prevTotal) : null;
-								const isOpen = drill.model === m.model;
-								return [
-									react.createElement("tr", { key: m.model, className: "tkst-row-click", onClick: () => toggleModelDrill(m.model) },
-										react.createElement("td", null, (isOpen ? "▾ " : "▸ ") + m.model),
-										react.createElement("td", null, deltaSpan(dd)),
-										react.createElement("td", null, m.calls),
-										react.createElement("td", null, fmt(m.total)),
-										react.createElement("td", null, fmtMoney(m.usd)), react.createElement("td", null, fmtCny(m.cny))
-									),
-									isOpen && drillModelSessions
-										? react.createElement("tr", { key: m.model + "-sub" },
-											react.createElement("td", { colSpan: 6, className: "tkst-sub" },
-												tableWrap(react.createElement("table", { className: "tkst-table" },
-													react.createElement("thead", null, react.createElement("tr", null,
-														react.createElement("th", null, t.session), react.createElement("th", null, t.calls),
-														react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd)
-													)),
-													react.createElement("tbody", null, drillModelSessions.map((s) =>
-														react.createElement("tr", { key: s.sessionId },
-															react.createElement("td", { title: s.title || s.sessionId }, shortName(s.title || s.sessionId)),
-															react.createElement("td", null, s.calls),
-															react.createElement("td", null, fmt(s.total)),
-															react.createElement("td", null, fmtMoney(s.usd))
-														)))
-												))
+					react.createElement("tbody", null,
+						modelRows.map((m) => {
+							const dd = m.prevTotal > 0 ? pctDelta(m.total, m.prevTotal) : null;
+							const isOpen = drill.model === m.model;
+							const rows = [
+								react.createElement("tr", {
+									key: m.model, className: "tkst-row-click",
+									onClick: () => toggleModelDrill(m.model)
+								},
+									react.createElement("td", null, modelDot(m.model), (isOpen ? "▾ " : "▸ ") + m.model),
+									react.createElement("td", null, deltaSpan(dd)),
+									react.createElement("td", null, m.calls),
+									react.createElement("td", null, fmt(m.total)),
+									react.createElement("td", null, fmtMoney(m.usd)),
+									react.createElement("td", null, fmtCny(m.cny))
+								)
+							];
+							if (isOpen && drillModelSessions) {
+								rows.push(react.createElement("tr", { key: m.model + "-sub" },
+									react.createElement("td", { colSpan: 6, className: "tkst-sub" },
+										tableWrap(react.createElement("table", { className: "tkst-table" },
+											react.createElement("thead", null, react.createElement("tr", null,
+												react.createElement("th", null, t.session),
+												react.createElement("th", null, t.calls),
+												react.createElement("th", null, t.tokens),
+												react.createElement("th", null, t.costUsd)
+											)),
+											react.createElement("tbody", null, drillModelSessions.map((s) =>
+												react.createElement("tr", { key: s.sessionId },
+													react.createElement("td", { title: s.title || s.sessionId }, shortName(s.title || s.sessionId)),
+													react.createElement("td", null, s.calls),
+													react.createElement("td", null, fmt(s.total)),
+													react.createElement("td", null, fmtMoney(s.usd))
+												)
 											))
-										: null,
-									isOpen && !drillModelSessions
-										? react.createElement("tr", { key: m.model + "-sub-load" },
-											react.createElement("td", { colSpan: 6, className: "tkst-sub" }, t.loading))
-										: null
-								];
-							})
-						)
-					))
-				),
-				react.createElement("div", { className: "tkst-sec" },
-					react.createElement("h4", null, t.bySession),
+										))
+									)
+								));
+							} else if (isOpen) {
+								rows.push(react.createElement("tr", { key: m.model + "-sub-load" },
+									react.createElement("td", { colSpan: 6, className: "tkst-sub" }, t.loading)
+								));
+							}
+							return rows;
+						})
+					)
+				));
+
+				// 按模型统计: full-width table — the single source of model stats.
+				// (The old left-column bars list duplicated this data and truncated names.)
+				page.push(react.createElement("div", { key: "models", className: "tkst-sec" },
+					react.createElement("div", { className: "tkst-sec-hd" },
+						react.createElement("h4", null, t.byModel),
+						modelRowsAll.length
+							? react.createElement("span", { className: "hd-meta" }, modelRowsAll.length + " " + t.model)
+							: null
+					),
+					modelRows.length === 0
+						? react.createElement("div", { className: "tkst-panel" },
+							react.createElement("div", { className: "tkst-empty" }, t.empty))
+						: modelTable
+				));
+
+				page.push(react.createElement("div", { key: "sess", className: "tkst-sec" },
+					react.createElement("div", { className: "tkst-sec-hd" },
+						react.createElement("h4", null, t.bySession),
+						sessionRowsAll.length
+							? react.createElement("span", { className: "hd-meta" }, sessionRowsAll.length + " " + t.session)
+							: null
+					),
 					tableWrap(react.createElement("table", { className: "tkst-table" },
 						react.createElement("thead", null, react.createElement("tr", null,
 							th(t.session, "sessionId", sortSess, setSortSess),
@@ -625,46 +858,59 @@ window.__ModuleLoader__.load({
 						react.createElement("tbody", null,
 							sessionRows.map((s) => {
 								const isOpen = drill.session === s.sessionId;
-								return [
-									react.createElement("tr", { key: s.sessionId, className: "tkst-row-click", onClick: () => toggleSessionDrill(s.sessionId) },
-										react.createElement("td", { title: s.sessionId }, (isOpen ? "▾ " : "▸ ") + shortName(s.sessionId)),
+								const rows = [
+									react.createElement("tr", {
+										key: s.sessionId, className: "tkst-row-click",
+										onClick: () => toggleSessionDrill(s.sessionId)
+									},
+										react.createElement("td", { title: s.sessionId }, (isOpen ? "▾ " : "▸ ") + shortName(sessTitleMap.get(s.sessionId) || s.sessionId)),
 										react.createElement("td", null, s.calls),
 										react.createElement("td", null, fmt(s.total)),
-										react.createElement("td", null, fmtMoney(s.usd)), react.createElement("td", null, fmtCny(s.cny))
-									),
-									isOpen && drillSessionSeries
-										? react.createElement("tr", { key: s.sessionId + "-sub" },
-											react.createElement("td", { colSpan: 5, className: "tkst-sub" },
-												tableWrap(react.createElement("table", { className: "tkst-table" },
-													react.createElement("thead", null, react.createElement("tr", null,
-														react.createElement("th", null, t.day), react.createElement("th", null, t.calls),
-														react.createElement("th", null, t.tokens), react.createElement("th", null, t.costUsd)
-													)),
-													react.createElement("tbody", null, drillSessionSeries.map((p) =>
-														react.createElement("tr", { key: p.label },
-															react.createElement("td", null, p.label), react.createElement("td", null, p.calls),
-															react.createElement("td", null, fmt(p.total)),
-															react.createElement("td", null, fmtMoney(p.usd))
-														)))
+										react.createElement("td", null, fmtMoney(s.usd)),
+										react.createElement("td", null, fmtCny(s.cny))
+									)
+								];
+								if (isOpen && drillSessionSeries) {
+									rows.push(react.createElement("tr", { key: s.sessionId + "-sub" },
+										react.createElement("td", { colSpan: 5, className: "tkst-sub" },
+											tableWrap(react.createElement("table", { className: "tkst-table" },
+												react.createElement("thead", null, react.createElement("tr", null,
+													react.createElement("th", null, t.day),
+													react.createElement("th", null, t.calls),
+													react.createElement("th", null, t.tokens),
+													react.createElement("th", null, t.costUsd)
+												)),
+												react.createElement("tbody", null, drillSessionSeries.map((p) =>
+													react.createElement("tr", { key: p.label },
+														react.createElement("td", null, p.label),
+														react.createElement("td", null, p.calls),
+														react.createElement("td", null, fmt(p.total)),
+														react.createElement("td", null, fmtMoney(p.usd))
+													)
 												))
 											))
-										: null,
-									isOpen && !drillSessionSeries
-										? react.createElement("tr", { key: s.sessionId + "-sub-load" },
-											react.createElement("td", { colSpan: 5, className: "tkst-sub" }, t.loading))
-										: null
-								];
+										)
+									));
+								} else if (isOpen) {
+									rows.push(react.createElement("tr", { key: s.sessionId + "-sub-load" },
+										react.createElement("td", { colSpan: 5, className: "tkst-sub" }, t.loading)
+									));
+								}
+								return rows;
 							})
 						)
 					))
-				),
-				exportText ? react.createElement("div", { className: "tkst-exportbox" },
-					react.createElement("div", null, t.copied),
-					react.createElement("textarea", { readOnly: true, value: exportText })
-				) : null
-				)
-					)
-			);
+				));
+
+				if (exportText) {
+					page.push(react.createElement("div", { key: "export", className: "tkst-exportbox" },
+						react.createElement("div", null, t.copied),
+						react.createElement("textarea", { readOnly: true, value: exportText })
+					));
+				}
+			}
+
+			return react.createElement("div", { className: "tkst-page" }, page);
 		}
 
 		// ---------- registration: settings section only ----------

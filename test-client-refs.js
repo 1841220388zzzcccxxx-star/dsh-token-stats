@@ -72,7 +72,7 @@ check('apply registers settings section component', !!compRef.comp)
 // ---- build realistic data and walk StatView render path ----
 // We can't run hooks for real; instead we assert the data-shaping helpers exist
 // by scanning the source for the identifiers we rely on.
-const need = ['function TrendChart', 'StatsErrorBoundary', 'pctDelta', 'sortRows', 'shortName', 'tableWrap', 'tkst-sumline', 'slot * 0.85', 'H = 230', 'T().calls']
+const need = ['function TrendChart', 'StatsErrorBoundary', 'pctDelta', 'sortRows', 'shortName', 'tableWrap', 'tkst-chip', 'tkst-grad-', 'slot * 0.85', 'H = 230', 'T().calls']
 for (const n of need) check('source contains ' + n, code.includes(n))
 
 // ---- pseudo-execute the pure math parts of TrendChart ----
